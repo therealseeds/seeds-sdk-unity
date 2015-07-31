@@ -17,5 +17,15 @@
 # Unity3D generated meta files
 *.pidb.meta
 
+# Builds
+*.apk
+
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
+
+# MacOSX-specific
+.DS_Store
+
+# Windows-specific
+thumbs.db
+
