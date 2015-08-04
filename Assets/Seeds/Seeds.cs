@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 public class Seeds : MonoBehaviour
 {
@@ -14,9 +15,9 @@ public class Seeds : MonoBehaviour
     public static Seeds Instance { get; private set; }
 
     /// <summary>
-    /// True if debug should be enabled, false otherwise.
+    /// True if trace should be enabled, false otherwise.
     /// </summary>
-    public bool DebugEnabled = false;
+    public bool TraceEnabled = false;
 
     /// <summary>
     /// True if Seeds SDK should auto-initialize during instantiation, false otherwise.
@@ -75,6 +76,23 @@ public class Seeds : MonoBehaviour
 
         if (AutoInitialize)
             Init(ServerURL, ApplicationKey);
+
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        NotifyOnStart();
+        #endif
+    }
+
+    void OnApplicationPause(bool pauseStatus)
+    {
+        if (TraceEnabled)
+            Debug.LogFormat("[Seeds] OnApplicationPause({0})", pauseStatus);
+
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        if (pauseStatus)
+            NotifyOnStop();
+        else
+            NotifyOnStart();
+        #endif
     }
 
     #if UNITY_ANDROID && !UNITY_EDITOR
@@ -93,6 +111,38 @@ public class Seeds : MonoBehaviour
     {
         CurrentActivity.Call("runOnUiThread", new AndroidJavaRunnable(runnable));
     }
+
+    private AndroidJavaObject CreateMapFromDicrionary(IDictionary<string, string> dictionary)
+    {
+        AndroidJavaObject map;
+        using (var helpersClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.Helpers"))
+        {
+            map = helpersClass.CallStatic<AndroidJavaObject>("createHashMapOfStringString");
+        }
+
+        foreach (var entry in dictionary)
+        {
+            map.Call<AndroidJavaObject>("put", entry.Key, entry.Value);
+        }
+
+        return map;
+    }
+
+    private AndroidJavaObject CreateListFromEnumerable(IEnumerable<string> enumerable)
+    {
+        AndroidJavaObject list;
+        using (var helpersClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.Helpers"))
+        {
+            list = helpersClass.CallStatic<AndroidJavaObject>("createArrayListOfString");
+        }
+
+        foreach (var item in enumerable)
+        {
+            list.Call<bool>("add", item);
+        }
+
+        return list;
+    }
     #endif
 
     private static void NotImplemented(string method)
@@ -102,7 +152,7 @@ public class Seeds : MonoBehaviour
 
     void inAppMessageClicked(string notUsed)
     {
-        if (DebugEnabled)
+        if (TraceEnabled)
             Debug.Log("[Seeds] OnInAppMessageClicked");
 
         if (OnInAppMessageClicked != null)
@@ -111,7 +161,7 @@ public class Seeds : MonoBehaviour
 
     void inAppMessageClosedComplete(string inAppMessageId)
     {
-        if (DebugEnabled)
+        if (TraceEnabled)
             Debug.Log("[Seeds] OnInAppMessageClosedComplete");
         
         if (OnInAppMessageClosedComplete != null)
@@ -120,7 +170,7 @@ public class Seeds : MonoBehaviour
 
     void inAppMessageClosedIncomplete(string inAppMessageId)
     {
-        if (DebugEnabled)
+        if (TraceEnabled)
             Debug.Log("[Seeds] OnInAppMessageClosedIncomplete");
         
         if (OnInAppMessageClosedIncomplete != null)
@@ -129,7 +179,7 @@ public class Seeds : MonoBehaviour
 
     void inAppMessageLoadSucceeded(string inAppMessageId)
     {
-        if (DebugEnabled)
+        if (TraceEnabled)
             Debug.Log("[Seeds] OnInAppMessageLoadSucceeded");
         
         if (OnInAppMessageLoadSucceeded != null)
@@ -138,7 +188,7 @@ public class Seeds : MonoBehaviour
 
     void inAppMessageShownSuccessfully(string inAppMessageId)
     {
-        if (DebugEnabled)
+        if (TraceEnabled)
             Debug.Log("[Seeds] OnInAppMessageShownSuccessfully");
         
         if (OnInAppMessageShownSuccessfully != null)
@@ -147,7 +197,7 @@ public class Seeds : MonoBehaviour
 
     void inAppMessageShownInsuccessfully(string inAppMessageId)
     {
-        if (DebugEnabled)
+        if (TraceEnabled)
             Debug.Log("[Seeds] OnInAppMessageShownInsuccessfully");
         
         if (OnInAppMessageShownInsuccessfully != null)
@@ -156,7 +206,7 @@ public class Seeds : MonoBehaviour
 
     void noInAppMessageFound(string notUsed)
     {
-        if (DebugEnabled)
+        if (TraceEnabled)
             Debug.Log("[Seeds] OnNoInAppMessageFound");
         
         if (OnNoInAppMessageFound != null)
@@ -212,11 +262,31 @@ public class Seeds : MonoBehaviour
         }
     }
 
-    //TODO: initMessaging
-    //TODO: initInAppMessaging
-    //TODO: halt
-    //TODO: onStart/onStop
-    //TODO: onRegistrationId
+    public void Halt()
+    {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call("halt");
+        #else
+        NotImplemented("Halt()");
+        #endif
+    }
+
+    #if UNITY_ANDROID && !UNITY_EDITOR
+    public void NotifyOnStart()
+    {
+        RunOnUIThread(() => androidInstance.Call("onStart"));
+    }
+
+    public void NotifyOnStop()
+    {
+        RunOnUIThread(() => androidInstance.Call("onStop"));
+    }
+
+    public void NotifyOnGCMRegistrationId(string registrationId)
+    {
+        androidInstance.Call("onRegistrationId", registrationId);
+    }
+    #endif
 
     public void RecordEvent(string key)
     {
@@ -245,8 +315,23 @@ public class Seeds : MonoBehaviour
         #endif
     }
 
-    //TODO: recordEvent(final String key, final Map<String, String> segmentation, final int count)
-    //TODO: recordEvent(final String key, final Map<String, String> segmentation, final int count, final double sum)
+    public void RecordEvent(string key, IDictionary<string, string> segmentation, int count)
+    {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call("recordEvent", key, CreateMapFromDicrionary(segmentation), count);
+        #else
+        NotImplemented("RecordEvent(string key, IDictionary<string, string> segmentation, int count)");
+        #endif
+    }
+
+    public void RecordEvent(string key, IDictionary<string, string> segmentation, int count, double sum)
+    {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call("recordEvent", key, CreateMapFromDicrionary(segmentation), count, sum);
+        #else
+        NotImplemented("RecordEvent(string key, IDictionary<string, string> segmentation, int count, double sum)");
+        #endif
+    }
 
     public void RecordIAPEvent(string key, double price)
     {
@@ -266,9 +351,39 @@ public class Seeds : MonoBehaviour
         #endif
     }
 
-    //TODO: setUserData(Map<String, String> data)
-    //TODO: setUserData(Map<String, String> data, Map<String, String> customdata)
-    //TODO: setCustomUserData(Map<String, String> customdata)
+    public Seeds SetUserData(IDictionary<string, string> data)
+    {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call<AndroidJavaObject>("setUserData", CreateMapFromDicrionary(data));
+        #else
+        NotImplemented("SetUserData(IDictionary<string, string> data)");
+        #endif
+
+        return this;
+    }
+
+    public Seeds SetUserData(IDictionary<string, string> data, IDictionary<string, string> customData)
+    {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call<AndroidJavaObject>("setUserData", CreateMapFromDicrionary(data),
+            CreateMapFromDicrionary(customData));
+        #else
+        NotImplemented("SetUserData(IDictionary<string, string> data, IDictionary<string, string> customData)");
+        #endif
+
+        return this;
+    }
+
+    public Seeds SetCustomUserData(IDictionary<string, string> customData)
+    {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call<AndroidJavaObject>("setCustomUserData", CreateMapFromDicrionary(customData));
+        #else
+        NotImplemented("SetCustomUserData(IDictionary<string, string> customData)");
+        #endif
+
+        return this;
+    }
 
     public Seeds SetLocation(double lat, double lon)
     {
@@ -281,7 +396,16 @@ public class Seeds : MonoBehaviour
         return this;
     }
 
-    //TODO: setCustomCrashSegments(Map<String, String> segments)
+    public Seeds SetCustomCrashSegments(IDictionary<string, string> segments)
+    {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call<AndroidJavaObject>("setCustomCrashSegments", CreateMapFromDicrionary(segments));
+        #else
+        NotImplemented("SetCustomCrashSegments(IDictionary<string, string> segments)");
+        #endif
+
+        return this;
+    }
 
     public Seeds AddCrashLog(string record)
     {
@@ -294,7 +418,16 @@ public class Seeds : MonoBehaviour
         return this;
     }
 
-    //TODO: logException
+    public Seeds LogException(string exception)
+    {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call<AndroidJavaObject>("logException", exception);
+        #else
+        NotImplemented("LogException(string exception)");
+        #endif
+
+        return this;
+    }
 
     public Seeds EnableCrashReporting()
     {
@@ -346,7 +479,16 @@ public class Seeds : MonoBehaviour
         }
     }
 
-    //TODO: enablePublicKeyPinning
+    public Seeds EnablePublicKeyPinning(IEnumerable<string> certificates)
+    {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call<AndroidJavaObject>("enablePublicKeyPinning", CreateListFromEnumerable(certificates));
+        #else
+        NotImplemented("EnablePublicKeyPinning(IEnumerable<string> certificates)");
+        #endif
+
+        return this;
+    }
 
     public bool IsABTestingOn
     {
