@@ -42,7 +42,7 @@ MonoBehaviour:
   TraceEnabled: 0
   AutoInitialize: 0
   ServerURL: http://dash.playseeds.com
-  ApplicationKey: 
+  ApplicationKey: test
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
