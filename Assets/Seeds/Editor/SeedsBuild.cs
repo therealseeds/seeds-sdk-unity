@@ -103,7 +103,14 @@ public static class SeedsBuild
                             }
                             else if (zipEntry.FileName == "AndroidManifest.xml")
                             {
-                                Debug.LogFormat("TDB: {0}:{1} merged", pluginFilename, zipEntry.FileName);
+                                var targetFilename = Path.GetFileNameWithoutExtension(pluginFilename) + "_AndroidManifest.xml";
+                                var targetFilepath = Path.Combine(androidPluginsPath, targetFilename);
+                                using (var stream = File.Open(targetFilepath, FileMode.Create))
+                                {
+                                    zipEntry.Extract(stream);
+                                }
+
+                                Debug.LogFormat("{0}:{1} unpacked to {2}", pluginFilename, zipEntry.FileName, targetFilename);
                             }
                             else if (
                                 (zipEntry.Attributes & FileAttributes.Directory) == 0 &&
@@ -118,8 +125,6 @@ public static class SeedsBuild
 
                                 Debug.LogFormat("{0}:{1} unpacked to {2}", pluginFilename, zipEntry.FileName, zipEntry.FileName);
                             }
-//                            else
-//                                Debug.Log(pluginFilename + " > " + zippedFile.FileName);
                         }
                     }
                     continue;
