@@ -39,13 +39,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a122746f02d414a7995003ca0ac5658c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TraceEnabled: 0
+  AutoInitialize: 0
+  ServerURL: http://dash.playseeds.com
+  ApplicationKey: 
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: ServerURL
+      value: http://dash.playseeds.com
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 119454}

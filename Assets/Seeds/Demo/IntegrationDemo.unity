@@ -290,11 +290,7 @@ Prefab:
       value: Seeds
       objectReference: {fileID: 0}
     - target: {fileID: 11451482, guid: 7e4d073fe95614324b19babe4b4eabea, type: 2}
-      propertyPath: ApplicationKey
-      value: aa1fd1f255b25fb89b413f216f11e8719188129d
-      objectReference: {fileID: 0}
-    - target: {fileID: 11451482, guid: 7e4d073fe95614324b19babe4b4eabea, type: 2}
-      propertyPath: LoggingEnabled
+      propertyPath: TraceEnabled
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11451482, guid: 7e4d073fe95614324b19babe4b4eabea, type: 2}
@@ -302,12 +298,8 @@ Prefab:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11451482, guid: 7e4d073fe95614324b19babe4b4eabea, type: 2}
-      propertyPath: DebugEnabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11451482, guid: 7e4d073fe95614324b19babe4b4eabea, type: 2}
-      propertyPath: TraceEnabled
-      value: 1
+      propertyPath: ApplicationKey
+      value: test
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7e4d073fe95614324b19babe4b4eabea, type: 2}
