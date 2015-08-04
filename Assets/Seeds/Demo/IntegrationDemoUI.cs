@@ -3,14 +3,14 @@ using System.Collections;
 
 public class IntegrationDemoUI : MonoBehaviour
 {
-    public void RecordEvent1()
+    public void RecordIAPEvent1()
     {
-        Seeds.Instance.RecordEvent("unity3d test event 1");
+        Seeds.Instance.RecordIAPEvent("iap event 1", 9.99);
     }
 
-    public void RecordEvent2()
+    public void RecordSeedsIAPEvent1()
     {
-        Seeds.Instance.RecordEvent("unity3d test event 2");
+        Seeds.Instance.RecordSeedsIAPEvent("seeds iap event 1", 19.99);
     }
 
     public void InAppMessage1()
