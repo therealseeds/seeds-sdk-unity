@@ -34,6 +34,8 @@ Download the package:
 
 From the Unity editor "Assets" menu, select "Import Package" => "Custom Package..." and select the package you downloaded.
 
+(Note: if you get an error saying assets/plugins or other folders are mapped to something else. Try the following workaround: 1) rename the folders with errors 2) import the Seeds package 3) rename the original folders back to their original names.)
+
 ###2. Configure the Seeds prefab
 
 Select the Seeds prefab in the bottom Project view in  Assets/Seeds and in the right inspector panel input "http://dash.playseeds.com" as your Server URL and use "test" (or your own app_key if you have one already) for the Application Key.
