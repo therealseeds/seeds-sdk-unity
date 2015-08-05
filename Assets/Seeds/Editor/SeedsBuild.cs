@@ -18,6 +18,7 @@ public static class SeedsBuild
             {
                 "Assets/Plugins",
                 "Assets/Seeds/Seeds.cs",
+                "Assets/Seeds/Seeds.prefab",
                 "Assets/Seeds/Demo",
             };
 
@@ -230,6 +231,7 @@ public static class SeedsBuild
             {
                 "Assets/Plugins",
                 "Assets/Seeds/Seeds.cs",
+                "Assets/Seeds/Seeds.prefab",
                 "Assets/Seeds/Demo",
             };
 
