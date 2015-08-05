@@ -1,4 +1,4 @@
-#Seeds Unity 5.x Package for Android
+#Seeds Unity Package for Android
 
 #Seeds
 [Seeds](http://www.playseeds.com) increases paying user conversion for freemium mobile games motivating users to make their first purchase by letting them know that their purchase will help finance microloans in the developing world. The SDK implements this with an interstitial ad and event tracking analytics.
@@ -26,7 +26,9 @@ We will then set you up with an app_key specific to your game and make a custom 
 
 ####Download the package
 
-Download the package from [https://bintray.com/artifact/download/seedsinc/maven/unity-sdk%20/%200.2.0/SeedsSDK.unitypackage](https://bintray.com/artifact/download/seedsinc/maven/unity-sdk%20/%200.2.0/SeedsSDK.unitypackage)
+Download the package:
+[Unity 4.x](https://bintray.com/artifact/download/seedsinc/maven/unity-sdk%20/%200.2.0/SeedsSDK-Unity4x.unitypackage)
+[Unity 5.x](https://bintray.com/artifact/download/seedsinc/maven/unity-sdk%20/%200.2.0/SeedsSDK-Unity5x.unitypackage)
 
 ####Import the package
 
