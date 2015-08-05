@@ -3,6 +3,7 @@ using UnityEditor;
 using System.IO;
 using System;
 using Ionic.Zip;
+using System.Xml;
 
 public static class SeedsBuild
 {
@@ -57,6 +58,10 @@ public static class SeedsBuild
         var originalAssetsPath = Path.Combine(projectPath, "Assets_Original");
         var originalPluginsPath = Path.Combine(originalAssetsPath, "Plugins");
         var originalAndroidPluginsPath = Path.Combine(originalPluginsPath, "Android");
+        var playerAndroidManifestPath =
+            Path.Combine(EditorApplication.applicationContentsPath, "PlaybackEngines/AndroidPlayer/AndroidManifest.xml");
+        var seedsAndroidManifestPath =
+            Path.Combine(androidPluginsPath, "AndroidManifest.xml");
 
         EditorUtility.DisplayProgressBar("Seeds SDK", "Building package", 0.0f);
         try
@@ -66,6 +71,12 @@ public static class SeedsBuild
             Directory.CreateDirectory(originalPluginsPath);
             Directory.Move(androidPluginsPath, originalAndroidPluginsPath);
             Directory.CreateDirectory(androidPluginsPath);
+            var androidManifestDocument = new XmlDocument();
+            androidManifestDocument.Load(playerAndroidManifestPath);
+            var androidNS = "http://schemas.android.com/apk/res/android";
+            int? minSdkVersion = null;
+            int? maxSdkVersion = null;
+
             foreach (var pluginFilepath in Directory.GetFiles(originalAndroidPluginsPath))
             {
                 var pluginFilename = Path.GetFileName(pluginFilepath);
@@ -110,7 +121,59 @@ public static class SeedsBuild
                                     zipEntry.Extract(stream);
                                 }
 
-                                Debug.LogFormat("{0}:{1} unpacked to {2}", pluginFilename, zipEntry.FileName, targetFilename);
+                                var manifestToMerge = new XmlDocument();
+                                manifestToMerge.Load(targetFilepath);
+
+                                var manifestNode = androidManifestDocument.SelectSingleNode("/manifest");
+                                var manifestDeclarations = manifestToMerge.SelectNodes("manifest/*");
+                                foreach (XmlNode manifestDeclaration in manifestDeclarations)
+                                {
+                                    if (manifestDeclaration.Name == "application")
+                                        continue;
+                                    else if (manifestDeclaration.Name == "uses-sdk")
+                                    {
+                                        var minSdkVersionNode =
+                                            manifestDeclaration.Attributes.GetNamedItem("minSdkVersion", androidNS);
+                                        if (minSdkVersionNode != null)
+                                        {
+                                            int value = int.Parse(minSdkVersionNode.Value);
+                                            if (minSdkVersion == null)
+                                                minSdkVersion = value;
+                                            else
+                                                minSdkVersion = Math.Max(minSdkVersion.Value, value);
+                                        }
+
+                                        var maxSdkVersionNode =
+                                            manifestDeclaration.Attributes.GetNamedItem("maxSdkVersion", androidNS);
+                                        if (maxSdkVersionNode != null)
+                                        {
+                                            int value = int.Parse(maxSdkVersionNode.Value);
+                                            if (maxSdkVersion == null)
+                                                maxSdkVersion = value;
+                                            else
+                                                maxSdkVersion = Math.Min(maxSdkVersion.Value, value);
+                                        }
+
+                                        continue;
+                                    }
+
+                                    var importedManifestDeclaration =
+                                        androidManifestDocument.ImportNode(manifestDeclaration, true);
+
+                                    manifestNode.AppendChild(importedManifestDeclaration);
+                                }
+
+                                var applicationNode = androidManifestDocument.SelectSingleNode("/manifest/application");
+                                var applicationDeclarations = manifestToMerge.SelectNodes("manifest/application/*");
+                                foreach (XmlNode applicationDeclaration in applicationDeclarations)
+                                {
+                                    var importedApplicationDeclaration =
+                                        androidManifestDocument.ImportNode(applicationDeclaration, true);
+
+                                    applicationNode.AppendChild(importedApplicationDeclaration);
+                                }
+
+                                File.Delete(targetFilename);
                             }
                             else if (
                                 (zipEntry.Attributes & FileAttributes.Directory) == 0 &&
@@ -140,6 +203,28 @@ public static class SeedsBuild
                     File.Copy(pluginFilepath, Path.Combine(androidPluginsPath, pluginFilename));
                 }
             }
+            if (minSdkVersion != null || maxSdkVersion != null)
+            {
+                var usesSdkNode = androidManifestDocument.CreateNode(XmlNodeType.Element, "uses-sdk", "");
+
+                if (minSdkVersion != null)
+                {
+                    var minSdkVersionAttribute = androidManifestDocument.CreateAttribute("android", "minSdkVersion", androidNS);
+                    minSdkVersionAttribute.Value = minSdkVersion.Value.ToString();
+                    usesSdkNode.Attributes.Append(minSdkVersionAttribute);
+                }
+
+                if (maxSdkVersion != null)
+                {
+                    var maxSdkVersionAttribute = androidManifestDocument.CreateAttribute("android", "maxSdkVersion", androidNS);
+                    maxSdkVersionAttribute.Value = maxSdkVersion.Value.ToString();
+                    usesSdkNode.Attributes.Append(maxSdkVersionAttribute);
+                }
+              
+                var manifestNode = androidManifestDocument.SelectSingleNode("/manifest");
+                manifestNode.AppendChild(usesSdkNode);
+            }
+            androidManifestDocument.Save(seedsAndroidManifestPath);
 
             var assetPaths = new string[]
             {
