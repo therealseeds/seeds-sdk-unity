@@ -85,7 +85,7 @@ public class Seeds : MonoBehaviour
     void OnApplicationPause(bool pauseStatus)
     {
         if (TraceEnabled)
-            Debug.LogFormat("[Seeds] OnApplicationPause({0})", pauseStatus);
+            Debug.Log(string.Format("[Seeds] OnApplicationPause({0})", pauseStatus));
 
         #if UNITY_ANDROID && !UNITY_EDITOR
         if (pauseStatus)
@@ -147,7 +147,7 @@ public class Seeds : MonoBehaviour
 
     private static void NotImplemented(string method)
     {
-        Debug.LogErrorFormat("Method {0} not implemented for current platform", method);
+        Debug.LogError(string.Format("Method {0} not implemented for current platform", method));
     }
 
     void inAppMessageClicked(string notUsed)
