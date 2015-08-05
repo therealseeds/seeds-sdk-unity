@@ -34,11 +34,9 @@ Download the package:
 
 From the Unity editor "Assets" menu, select "Import Package" => "Custom Package..." and select the package you downloaded.
 
-###2. Add and Configure a Seeds prefab
+###2. Configure the Seeds prefab
 
-Add an object to your scene ("Game Object" => "Create Empty") and then in Assets/Seeds create a new Prefab (right click => "Create" => "Prefab"). Drag the game object to the newly created Prefab. Name them both "Seeds".
-
-Now, select the Seeds prefab and in the right panel add the Seeds script ("Add Component" => "Scripts" => "Seeds"). Input "http://dash.playseeds.com" as your Server URL and use "test" (or your own app_key if you have one already) for the Application Key.
+Select the Seeds prefab in the bottom Project view in  Assets/Seeds and in the right inspector panel input "http://dash.playseeds.com" as your Server URL and use "test" (or your own app_key if you have one already) for the Application Key.
 
 ###3. Display the Seeds promo interstitial
 
