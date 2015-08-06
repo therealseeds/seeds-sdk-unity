@@ -1,27 +1,23 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System;
-using Ionic.Zip;
+using System.Linq;
 using System.Xml;
+using Ionic.Zip;
+using UnityEditor;
+using UnityEngine;
 
 public static class SeedsBuild
 {
     [MenuItem("Seeds SDK/Build package")]
     public static void BuildPackage()
     {
+        var projectPath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+
         EditorUtility.DisplayProgressBar("Seeds SDK", "Building package", 0.0f);
 
         try
         {
-            var assetPaths = new string[]
-            {
-                "Assets/Plugins",
-                "Assets/Seeds/Seeds.cs",
-                "Assets/Seeds/Seeds.prefab",
-                "Assets/Seeds/Demo",
-            };
-
             var packagePath = "SeedsSDK.unitypackage";
 
             EditorUtility.DisplayProgressBar("Seeds SDK", "Building package", 0.25f);
@@ -31,11 +27,21 @@ public static class SeedsBuild
             importOpts |= ImportAssetOptions.ForceUpdate;
             importOpts |= ImportAssetOptions.ImportRecursive;
             AssetDatabase.Refresh(importOpts);
+            var allAssets = AssetDatabase.GetAllAssetPaths();
 
             EditorUtility.DisplayProgressBar("Seeds SDK", "Building package", 0.5f);
 
+            var assetsToExport = new List<string>();
+            assetsToExport.Add("Assets/Seeds/Seeds.cs");
+            assetsToExport.Add("Assets/Seeds/Seeds.prefab");
+            assetsToExport.AddRange(allAssets.Where(
+                x => x.StartsWith("Assets/Plugins") &&
+                File.Exists(Path.Combine(projectPath, x))));
+            assetsToExport.AddRange(allAssets.Where(x =>
+                x.StartsWith("Assets/Seeds/Demo") &&
+                File.Exists(Path.Combine(projectPath, x))));
             var exportOpts = ExportPackageOptions.Recurse;
-            AssetDatabase.ExportPackage(assetPaths, packagePath, exportOpts);
+            AssetDatabase.ExportPackage(assetsToExport.ToArray(), packagePath, exportOpts);
 
             EditorUtility.DisplayProgressBar("Seeds SDK", "Building package", 0.9f);
         }
@@ -227,14 +233,6 @@ public static class SeedsBuild
             }
             androidManifestDocument.Save(seedsAndroidManifestPath);
 
-            var assetPaths = new string[]
-            {
-                "Assets/Plugins",
-                "Assets/Seeds/Seeds.cs",
-                "Assets/Seeds/Seeds.prefab",
-                "Assets/Seeds/Demo",
-            };
-
             var packagePath = "SeedsSDK_Legacy.unitypackage";
 
             EditorUtility.DisplayProgressBar("Seeds SDK", "Building package", 0.25f);
@@ -244,11 +242,21 @@ public static class SeedsBuild
             importOpts |= ImportAssetOptions.ForceUpdate;
             importOpts |= ImportAssetOptions.ImportRecursive;
             AssetDatabase.Refresh(importOpts);
+            var allAssets = AssetDatabase.GetAllAssetPaths();
 
             EditorUtility.DisplayProgressBar("Seeds SDK", "Building package", 0.5f);
 
+            var assetsToExport = new List<string>();
+            assetsToExport.Add("Assets/Seeds/Seeds.cs");
+            assetsToExport.Add("Assets/Seeds/Seeds.prefab");
+            assetsToExport.AddRange(allAssets.Where(
+                x => x.StartsWith("Assets/Plugins") &&
+                File.Exists(Path.Combine(projectPath, x))));
+            assetsToExport.AddRange(allAssets.Where(x =>
+                x.StartsWith("Assets/Seeds/Demo") &&
+                File.Exists(Path.Combine(projectPath, x))));
             var exportOpts = ExportPackageOptions.Recurse;
-            AssetDatabase.ExportPackage(assetPaths, packagePath, exportOpts);
+            AssetDatabase.ExportPackage(assetsToExport.ToArray(), packagePath, exportOpts);
 
             EditorUtility.DisplayProgressBar("Seeds SDK", "Building package", 0.9f);
 
