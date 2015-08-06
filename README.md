@@ -90,6 +90,10 @@ where ITEM is a string that is the name or SKU of the item and PRICE is a double
 
 If you are getting an error like `Main manifest has <uses-sdk android:minSdkVersion='10'> but library uses minSdkVersion='12'`, this is because Seeds requires a minimum Android API level of 12. To change your project's Android build settings, from the menu select “File” => “Build Settings”, then select “Android”, then “Player Settings” and then in the Inspector scroll down to “Minimum API Level” in the “Identification” section and change the value to “API Level 12"
 
+###Google Play Services-related errors upon Building
+
+Our SDK comes with google play services. If you already have google play services installed, you may have to remove the duplicate files
+
 ## Support
 
 Open an issue or email [sungwon@playseeds.com](sungwon@playseeds.com)
