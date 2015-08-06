@@ -38,7 +38,7 @@ From the Unity editor "Assets" menu, select "Import Package" => "Custom Package.
 
 ###2. Configure the Seeds prefab
 
-Select the Seeds prefab in the bottom Project view in  Assets/Seeds and in the right inspector panel input "http://dash.playseeds.com" as your Server URL and use "test" (or your own app_key if you have one already) for the Application Key.
+Select the Seeds prefab in the Project view in Assets/Seeds and in the inspector panel input "http://dash.playseeds.com" as your Server URL and use "test" (or your own app_key if you have one already) for the Application Key. Make sure that the "Auto Initialize" check box is checked.
 
 ###3. Display the Seeds promo interstitial
 
