@@ -27,8 +27,8 @@ We will then set you up with an app_key specific to your game and make a custom 
 ####Download the package
 
 Download the package:
-- [Unity 4.x](https://bintray.com/artifact/download/seedsinc/maven/unity-sdk%20/%200.2.1/SeedsSDK021_Unity4x.unitypackage)
-- [Unity 5.x](https://bintray.com/artifact/download/seedsinc/maven/unity-sdk/0.2.1/SeedsSDK021_Unity5x.unitypackage)
+- [Unity 4.x](https://bintray.com/artifact/download/seedsinc/maven/unity-sdk%20/%200.2.2/SeedsSDK022_Unity4.unitypackage)
+- [Unity 5.x](https://bintray.com/artifact/download/seedsinc/maven/unity-sdk%20/%200.2.2/SeedsSDK022_Unity5.unitypackage)
 
 ####Import the package
 
