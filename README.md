@@ -4,8 +4,8 @@
 [Seeds](http://www.playseeds.com) increases paying user conversion for freemium mobile games motivating users to make their first purchase by letting them know that their purchase will help finance microloans in the developing world. The SDK implements this with an interstitial ad and event tracking analytics.
 
 We also have available:
-[API](https://github.com/therealseeds/seeds-public-api)
-[Android SDK](https://github.com/therealseeds/seeds-sdk-android)
+- [API](https://github.com/therealseeds/seeds-public-api)
+- [Android SDK](https://github.com/therealseeds/seeds-sdk-android)
 
 ##The Seeds Unity SDK
 
