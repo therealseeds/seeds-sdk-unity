@@ -40,8 +40,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TraceEnabled: 0
-  AutoInitialize: 0
-  ServerURL: http://dash.playseeds.com
+  AutoInitialize: 1
+  ServerURL: http://devdash.playseeds.com
   ApplicationKey: test
 --- !u!1001 &100100000
 Prefab:
