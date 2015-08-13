@@ -1,7 +1,17 @@
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
+## Android Studio-related based on https://github.com/github/gitignore/blob/master/Global/JetBrains.gitignore
+*.iml
+.idea/
+
+## Android-related based on https://github.com/github/gitignore/blob/master/Android.gitignore
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+## MacOSX-specific
 .DS_Store
-/build
-/captures
+
+## Windows-specific
+thumbs.db
