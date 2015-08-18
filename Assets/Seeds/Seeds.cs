@@ -57,6 +57,14 @@ public class Seeds : MonoBehaviour
         Instance = this;
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_Setup();
+
+    [DllImport ("__Internal")]
+    private static extern void Seeds_SetGameObjectName(string gameObjectName);
+    #endif
+
     void Start()
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
@@ -68,6 +76,9 @@ public class Seeds : MonoBehaviour
         {
             androidBridgeInstance = inAppMessageListenerBridgeClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
         }
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_Setup();
+        Seeds_SetGameObjectName(gameObject.name);
         #endif
 
         if (AutoInitialize)
@@ -286,28 +297,49 @@ public class Seeds : MonoBehaviour
     }
     #endif
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_RecordEvent1(string key);
+    #endif
+
     public void RecordEvent(string key)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordEvent", key);
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RecordEvent1(key);
         #else
         NotImplemented("RecordEvent(string key)");
         #endif
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_RecordEvent2(string key, int count);
+    #endif
+
     public void RecordEvent(string key, int count)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordEvent", key, count);
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RecordEvent2(key, count);
         #else
         NotImplemented("RecordEvent(string key, int count)");
         #endif
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_RecordEvent3(string key, int count, double sum);
+    #endif
+
     public void RecordEvent(string key, int count, double sum)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordEvent", key, count, sum);
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RecordEvent3(key, count, sum);
         #else
         NotImplemented("RecordEvent(string key, int count, double sum)");
         #endif
@@ -331,19 +363,33 @@ public class Seeds : MonoBehaviour
         #endif
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_RecordIAPEvent(string key, double price);
+    #endif
+
     public void RecordIAPEvent(string key, double price)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordIAPEvent", key, price);
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RecordIAPEvent(key, price);
         #else
         NotImplemented("RecordIAPEvent(string key, double price)");
         #endif
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_RecordSeedsIAPEvent(string key, double price);
+    #endif
+
     public void RecordSeedsIAPEvent(string key, double price)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordSeedsIAPEvent", key, price);
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RecordSeedsIAPEvent(key, price);
         #else
         NotImplemented("RecordSeedsIAPEvent(string key, double price)");
         #endif
@@ -488,12 +534,19 @@ public class Seeds : MonoBehaviour
         return this;
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern bool Seeds_GetABTestingOn();
+    #endif
+
     public bool IsABTestingOn
     {
         get
         {
             #if UNITY_ANDROID && !UNITY_EDITOR
             return androidInstance.Call<bool>("isA_bTestingOn");
+            #elif UNITY_IOS && !UNITY_EDITOR
+            return Seeds_GetABTestingOn();
             #else
             NotImplemented("IsABTestingOn::get");
             return false;
@@ -505,28 +558,49 @@ public class Seeds : MonoBehaviour
         }
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_SetABTestingOn(bool abTestingOn);
+    #endif
+
     public void SetABTestingOn(bool abTestingOn)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("setA_bTestingOn", abTestingOn);
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_SetABTestingOn(abTestingOn);
         #else
         NotImplemented("SetABTestingOn(bool abTestingOn)");
         #endif
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_SetMessageVariantName(string messageVariantName);
+    #endif
+
     public void SetMessageVariantName(string messageVariantName)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("setMessageVariantName", messageVariantName);
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_SetMessageVariantName(messageVariantName);
         #else
         NotImplemented("SetMessageVariantName(string messageVariantName)");
         #endif
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern string Seeds_GetMessageVariantName();
+    #endif
+
     public string GetMessageVariantName()
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         return androidInstance.Call<string>("getMessageVariantName");
+        #elif UNITY_IOS && !UNITY_EDITOR
+        return Seeds_GetMessageVariantName();
         #else
         NotImplemented("GetMessageVariantName()");
         return null;
@@ -545,14 +619,26 @@ public class Seeds : MonoBehaviour
         }
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_RequestInAppMessage();
+    #endif
+
     public void RequestInAppMessage()
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("requestInAppMessage");
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RequestInAppMessage();
         #else
         NotImplemented("RequestInAppMessage()");
         #endif
     }
+
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern bool Seeds_IsInAppMessageLoaded();
+    #endif
 
     public bool IsInAppMessageLoaded
     {
@@ -560,6 +646,8 @@ public class Seeds : MonoBehaviour
         {
             #if UNITY_ANDROID && !UNITY_EDITOR
             return androidInstance.Call<bool>("isInAppMessageLoaded");
+            #elif UNITY_IOS && !UNITY_EDITOR
+            return Seeds_IsInAppMessageLoaded();
             #else
             NotImplemented("IsInAppMessageLoaded::get");
             return false;
@@ -567,10 +655,17 @@ public class Seeds : MonoBehaviour
         }
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_ShowInAppMessage();
+    #endif
+
     public void ShowInAppMessage()
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("showInAppMessage");
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_ShowInAppMessage();
         #else
         NotImplemented("ShowInAppMessage()");
         #endif

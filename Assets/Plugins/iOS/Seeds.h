@@ -65,6 +65,8 @@ extern NSString* const kCLYUserCustom;
 
 - (void)requestInAppMessage;
 
+- (BOOL)isInAppMessageLoaded;
+
 - (void)showInAppMessageIn:(UIViewController*)viewController;
 
 #pragma mark - Seeds Messaging
