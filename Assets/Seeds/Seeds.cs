@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITY_IOS && !UNITY_EDITOR
+using System.Runtime.InteropServices;
+#endif
 using UnityEngine;
 
 public class Seeds : MonoBehaviour
 {
-    public enum DeviceIdMode
-    {
-        DeveloperSupplied,
-        OpenUDID,
-        AdvertisingId,
-    }
-
     public static Seeds Instance { get; private set; }
 
     /// <summary>
@@ -213,11 +209,18 @@ public class Seeds : MonoBehaviour
             OnNoInAppMessageFound();
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_Init(string serverUrl, string appKey);
+    #endif
+
     public Seeds Init(string serverUrl, string appKey)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", CurrentActivity, androidBridgeInstance, serverUrl,
             appKey));
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_Init(serverUrl, appKey);
         #else
         NotImplemented("Init(string serverUrl, string appKey)");
         #endif
@@ -225,25 +228,20 @@ public class Seeds : MonoBehaviour
         return this;
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_InitWithDeviceId(string serverUrl, string appKey, string deviceId);
+    #endif
+
     public Seeds Init(string serverUrl, string appKey, string deviceId)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", CurrentActivity, androidBridgeInstance, serverUrl,
             appKey, deviceId));
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_InitWithDeviceId(serverUrl, appKey, deviceId);
         #else
         NotImplemented("Init(string serverUrl, string appKey, string deviceId)");
-        #endif
-
-        return this;
-    }
-
-    public Seeds Init(string serverUrl, string appKey, string deviceId, DeviceIdMode? deviceIdMode)
-    {
-        #if UNITY_ANDROID && !UNITY_EDITOR
-        RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", CurrentActivity, androidBridgeInstance, serverUrl,
-            appKey, deviceId, deviceIdMode));
-        #else
-        NotImplemented("Init(string serverUrl, string appKey, string deviceId, DeviceIdMode? deviceIdMode)");
         #endif
 
         return this;
