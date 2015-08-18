@@ -39,6 +39,8 @@
 
 - (void)start:(NSString *)appKey withHost:(NSString *)appHost andDeviceId:(NSString *)deviceId;
 
+- (BOOL)isStarted;
+
 - (void)recordEvent:(NSString *)key count:(int)count;
 
 - (void)recordEvent:(NSString *)key count:(int)count sum:(double)sum;

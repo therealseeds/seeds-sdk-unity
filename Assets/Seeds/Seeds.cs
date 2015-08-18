@@ -258,12 +258,19 @@ public class Seeds : MonoBehaviour
         return this;
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern bool Seeds_IsStarted();
+    #endif
+
     public bool IsInitialized
     {
         get
         {
             #if UNITY_ANDROID && !UNITY_EDITOR
             return androidInstance.Call<bool>("isInitialized");
+            #elif UNITY_IOS && !UNITY_EDITOR
+            return Seeds_IsStarted();
             #else
             NotImplemented("IsInitialized::get");
             return false;
@@ -429,10 +436,17 @@ public class Seeds : MonoBehaviour
         return this;
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_SetLocation(double lat, double lon);
+    #endif
+
     public Seeds SetLocation(double lat, double lon)
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("setLocation", lat, lon);
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_SetLocation(lat, lon);
         #else
         NotImplemented("SetLocation(double lat, double lon)");
         #endif
@@ -473,10 +487,17 @@ public class Seeds : MonoBehaviour
         return this;
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_EnableCrashReporting();
+    #endif
+
     public Seeds EnableCrashReporting()
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("enableCrashReporting");
+        #elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_EnableCrashReporting();
         #else
         NotImplemented("EnableCrashReporting()");
         #endif

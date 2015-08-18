@@ -89,6 +89,11 @@ void Seeds_InitWithDeviceId(const char* pcsServerUrl, const char* pcsAppKey, con
     [Seeds.sharedInstance start:appKey withHost:serverUrl andDeviceId:deviceId];
 }
 
+BOOL Seeds_IsStarted()
+{
+    return [Seeds.sharedInstance isStarted];
+}
+
 void Seeds_RecordEvent1(const char* pcsKey)
 {
     NSString* key = [NSString stringWithUTF8String:pcsKey];
@@ -117,6 +122,16 @@ void Seeds_RecordSeedsIAPEvent(const char* pcsKey, double price)
 {
     NSString* key = [NSString stringWithUTF8String:pcsKey];
     [Seeds.sharedInstance recordSeedsIAPEvent:key price:price];
+}
+
+void Seeds_SetLocation(double lat, double lon)
+{
+    [Seeds.sharedInstance setLocation:lat longitude:lon];
+}
+
+void Seeds_EnableCrashReporting()
+{
+    [Seeds.sharedInstance startCrashReporting];
 }
 
 BOOL Seeds_GetABTestingOn()
