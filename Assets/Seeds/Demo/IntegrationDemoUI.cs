@@ -1,8 +1,18 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class IntegrationDemoUI : MonoBehaviour
 {
+    void Start()
+    {
+        var lastUrlReceivedGameObject = GameObject.Find("Last URL received");
+        SeedsDeepLinks.Instance.OnLinkArrived += (string url) => {
+            Debug.Log("Demo received URL + " + url);
+            lastUrlReceivedGameObject.GetComponent<Text>().text = url;
+        };
+    }
+
     public void RecordIAPEvent1()
     {
         Seeds.Instance.RecordIAPEvent("iap event 1", 9.99);

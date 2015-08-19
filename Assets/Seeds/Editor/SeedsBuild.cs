@@ -34,8 +34,14 @@ public static class SeedsBuild
             var assetsToExport = new List<string>();
             assetsToExport.Add("Assets/Seeds/Seeds.cs");
             assetsToExport.Add("Assets/Seeds/Seeds.prefab");
-            assetsToExport.AddRange(allAssets.Where(
-                x => x.StartsWith("Assets/Plugins") &&
+            assetsToExport.Add("Assets/Seeds/SeedsDeepLinks.cs");
+            assetsToExport.Add("Assets/Seeds/SeedsDeepLinks.prefab");
+            assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegration.cs");
+            assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegrationDialogWindow.cs");
+            assetsToExport.Add("Assets/Seeds/Editor/Ionic.Zip.dll");
+            assetsToExport.AddRange(allAssets.Where(x =>
+                x.StartsWith("Assets/Plugins") &&
+                !x.EndsWith("SeedsDeepLink.aar") &&
                 File.Exists(Path.Combine(projectPath, x))));
             assetsToExport.AddRange(allAssets.Where(x =>
                 x.StartsWith("Assets/Seeds/Demo") &&
@@ -87,6 +93,10 @@ public static class SeedsBuild
             foreach (var pluginFilepath in Directory.GetFiles(originalAndroidPluginsPath))
             {
                 var pluginFilename = Path.GetFileName(pluginFilepath);
+
+                if (pluginFilename.EndsWith("SeedsDeepLink.aar"))
+                    continue;
+
                 if (pluginFilename.EndsWith(".aar"))
                 {
                     // Unpack
@@ -249,6 +259,11 @@ public static class SeedsBuild
             var assetsToExport = new List<string>();
             assetsToExport.Add("Assets/Seeds/Seeds.cs");
             assetsToExport.Add("Assets/Seeds/Seeds.prefab");
+            assetsToExport.Add("Assets/Seeds/SeedsDeepLinks.cs");
+            assetsToExport.Add("Assets/Seeds/SeedsDeepLinks.prefab");
+            assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegration.cs");
+            assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegrationDialogWindow.cs");
+            assetsToExport.Add("Assets/Seeds/Editor/Ionic.Zip.dll");
             assetsToExport.AddRange(allAssets.Where(
                 x => x.StartsWith("Assets/Plugins") &&
                 File.Exists(Path.Combine(projectPath, x))));
