@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.IO;
 using System.Text;
+using System.Xml;
 using Ionic.Zip;
 using UnityEditor;
 using UnityEditor.Callbacks;
@@ -21,6 +22,28 @@ public static class SeedsIntegration
             pathPrefix = "/";
         else if (pathPrefix.Length > 0 && pathPrefix[0] != '/')
             pathPrefix = "/" + pathPrefix;
+
+        var deepLinkAndroidManifestContent = string.Format(@"
+            <manifest xmlns:android=""http://schemas.android.com/apk/res/android""
+                package=""com.playseeds.unity3d.androidbridge.deeplinks"">
+                <application>
+                    <activity
+                        android:name=""com.playseeds.unity3d.androidbridge.DeepLinkActivity""
+                        android:launchMode=""singleInstance""
+                        android:noHistory=""true"">
+                        <intent-filter>
+                            <action android:name=""android.intent.action.VIEW"" />
+                            <category android:name=""android.intent.category.DEFAULT"" />
+                            <category android:name=""android.intent.category.BROWSABLE"" />
+                            <data
+                                android:scheme=""{0}""
+                                android:host=""{1}""
+                                android:pathPrefix=""{2}"" />
+                        </intent-filter>
+                    </activity>
+                </application>
+            </manifest>
+            ".Trim(), scheme, host, pathPrefix);
 
         #if UNITY_5
         // For Unity3D 5.x+ Android AAR format is supported. So create SeedsDeepLinks.aar with following content:
@@ -64,34 +87,50 @@ public static class SeedsIntegration
             });
             seedsDeepLinksAar.AddEntry("R.txt", new byte[0]);
             seedsDeepLinksAar.AddDirectoryByName("res");
-            seedsDeepLinksAar.AddEntry(
-                "AndroidManifest.xml",
-                string.Format(@"
-                <manifest xmlns:android=""http://schemas.android.com/apk/res/android""
-                    package=""com.playseeds.unity3d.androidbridge.deeplinks"">
-                    <application>
-                        <activity
-                            android:name=""com.playseeds.unity3d.androidbridge.DeepLinkActivity""
-                            android:launchMode=""singleInstance""
-                            android:noHistory=""true"">
-                            <intent-filter>
-                                <action android:name=""android.intent.action.VIEW"" />
-                                <category android:name=""android.intent.category.DEFAULT"" />
-                                <category android:name=""android.intent.category.BROWSABLE"" />
-                                <data
-                                    android:scheme=""{0}""
-                                    android:host=""{1}""
-                                    android:pathPrefix=""{2}"" />
-                            </intent-filter>
-                        </activity>
-                    </application>
-                </manifest>
-                ".Trim(), scheme, host, pathPrefix), Encoding.ASCII);
+            seedsDeepLinksAar.AddEntry("AndroidManifest.xml", deepLinkAndroidManifestContent, Encoding.ASCII);
 
             seedsDeepLinksAar.Save(Path.Combine(Application.dataPath, "Plugins/Android/SeedsDeepLinks.aar"));
         }
         #elif UNITY_4
-        //TODO: For Unity3D 4.x only AndroidManifest.xml modification is needed
+        // For Unity3D 4.x only AndroidManifest.xml modification is needed
+
+        var androidManifestPath = Path.Combine(Application.dataPath, "Plugins/Android/AndroidManifest.xml");
+        var androidNS = "http://schemas.android.com/apk/res/android";
+
+        var androidManifestDocument = new XmlDocument();
+        androidManifestDocument.Load(androidManifestPath);
+        var manifestNsManager = new XmlNamespaceManager(androidManifestDocument.NameTable);
+        manifestNsManager.AddNamespace("android", androidNS);
+
+        var deepLinkActivityXPath =
+            "/manifest/application/activity[@android:name='com.playseeds.unity3d.androidbridge.DeepLinkActivity']";
+        var deepLinkActivityNode = androidManifestDocument.SelectSingleNode(deepLinkActivityXPath, manifestNsManager);
+        if (deepLinkActivityNode == null)
+        {
+            var applicactionNode = androidManifestDocument.SelectSingleNode("/manifest/application");
+
+            var deepLinkAndroidManifest = new XmlDocument();
+            deepLinkAndroidManifest.LoadXml(deepLinkAndroidManifestContent);
+            manifestNsManager = new XmlNamespaceManager(androidManifestDocument.NameTable);
+            manifestNsManager.AddNamespace("android", androidNS);
+            deepLinkActivityNode = deepLinkAndroidManifest.SelectSingleNode(deepLinkActivityXPath, manifestNsManager);
+
+            deepLinkActivityNode = androidManifestDocument.ImportNode(deepLinkActivityNode, true);
+            applicactionNode.AppendChild(deepLinkActivityNode);
+        }
+
+        var dataNode = deepLinkActivityNode.SelectSingleNode("intent-filter/data");
+
+        var schemeAttribute = dataNode.Attributes.GetNamedItem("scheme", androidNS);
+        var hostAttribute = dataNode.Attributes.GetNamedItem("host", androidNS);
+        var pathPrefixAttribute = dataNode.Attributes.GetNamedItem("pathPrefix", androidNS);
+
+        schemeAttribute.Value = scheme;
+        hostAttribute.Value = host;
+        pathPrefixAttribute.Value = pathPrefix;
+
+        androidManifestDocument.Save(androidManifestPath);
+
         #else
         #error Unsupported Unity3D version, please contact support.
         #endif
