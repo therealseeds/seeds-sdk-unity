@@ -3,16 +3,16 @@ using UnityEngine;
 
 public class SeedsIntegrationDialogWindow : EditorWindow
 {
-    private string scheme = "seeds";
-    private string host = "project";
-    private string pathPrefix = "";
+    public string Scheme { get; set; }
+    public string Host { get; set; }
+    public string PathPrefix { get; set; }
 
     void OnGUI()
     {
         GUILayout.Label("Deep Link URL", EditorStyles.boldLabel);
-        scheme = EditorGUILayout.TextField("Scheme", scheme);
-        host = EditorGUILayout.TextField("Host", host);
-        pathPrefix = EditorGUILayout.TextField("Path prefix", pathPrefix);
+        Scheme = EditorGUILayout.TextField("Scheme", Scheme);
+        Host = EditorGUILayout.TextField("Host", Host);
+        PathPrefix = EditorGUILayout.TextField("Path prefix", PathPrefix);
 
         if (GUILayout.Button("Configure"))
         {
@@ -23,23 +23,23 @@ public class SeedsIntegrationDialogWindow : EditorWindow
 
     void OnConfigure()
     {
-        scheme = scheme.Trim();
-        if (string.IsNullOrEmpty(scheme))
+        Scheme = Scheme.Trim();
+        if (string.IsNullOrEmpty(Scheme))
         {
             EditorUtility.DisplayDialog("Unable configure deep links", "Please specify a valid scheme.", "Close");
             return;
         }
 
-        host = host.Trim();
-        if (string.IsNullOrEmpty(host))
+        Host = Host.Trim();
+        if (string.IsNullOrEmpty(Host))
         {
             EditorUtility.DisplayDialog("Unable configure deep links", "Please specify a valid host.", "Close");
             return;
         }
 
-        pathPrefix = pathPrefix.Trim();
+        PathPrefix = PathPrefix.Trim();
 
-        SeedsIntegration.ConfigureDeepLinks(scheme, host, pathPrefix);
+        SeedsIntegration.ConfigureDeepLinks(Scheme, Host, PathPrefix);
 
         Close();
     }

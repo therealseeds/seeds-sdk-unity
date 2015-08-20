@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using Ionic.Zip;
@@ -12,7 +13,64 @@ public static class SeedsIntegration
     [MenuItem("Seeds SDK/Configure")]
     public static void ShowConfigureDialog()
     {
-        EditorWindow.GetWindow(typeof(SeedsIntegrationDialogWindow));
+        var dialogWindow = EditorWindow.GetWindow<SeedsIntegrationDialogWindow>(true, "Seeds SDK", true);
+
+        var scheme = "seeds";
+        var host = PlayerSettings.bundleIdentifier;
+        var pathPrefix = string.Empty;
+
+        var androidManifestDocument = new XmlDocument();
+        #if UNITY_5
+        var seedsDeepLinksAarFilename = Path.Combine(Application.dataPath, "Plugins/Android/SeedsDeepLinks.aar");
+        if (File.Exists(seedsDeepLinksAarFilename))
+        {
+            using (var seedsDeepLinksAar = ZipFile.Read(seedsDeepLinksAarFilename))
+            {
+                var androidManifestEntry = seedsDeepLinksAar.Entries
+                    .Where(x => x.FileName == "AndroidManifest.xml")
+                    .FirstOrDefault();
+                if (androidManifestEntry != null)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        androidManifestEntry.Extract(stream);
+                        stream.Position = 0;
+                        androidManifestDocument.Load(stream);
+                    }
+                }
+            }
+        }
+        #elif UNITY_4
+        var androidManifestFilename = Path.Combine(Application.dataPath, "Plugins/Android/AndroidManifest.xml");
+        if (File.Exists(androidManifestFilename))
+            androidManifestDocument.Load(androidManifestFilename);
+        #endif
+
+        var manifestNsManager = new XmlNamespaceManager(androidManifestDocument.NameTable);
+        var androidNS = "http://schemas.android.com/apk/res/android";
+        manifestNsManager.AddNamespace("android", androidNS);
+
+        var deepLinkActivityXPath =
+            "/manifest/application/activity[@android:name='com.playseeds.unity3d.androidbridge.DeepLinkActivity']";
+        var deepLinkActivityNode = androidManifestDocument.SelectSingleNode(deepLinkActivityXPath, manifestNsManager);
+        if (deepLinkActivityNode != null)
+        {
+            var dataNode = deepLinkActivityNode.SelectSingleNode("intent-filter/data");
+
+            var schemeAttribute = dataNode.Attributes.GetNamedItem("scheme", androidNS);
+            var hostAttribute = dataNode.Attributes.GetNamedItem("host", androidNS);
+            var pathPrefixAttribute = dataNode.Attributes.GetNamedItem("pathPrefix", androidNS);
+
+            scheme = schemeAttribute.Value;
+            host = hostAttribute.Value;
+            pathPrefix = pathPrefixAttribute.Value;
+        }
+
+        dialogWindow.Scheme = scheme;
+        dialogWindow.Host = host;
+        dialogWindow.PathPrefix = pathPrefix;
+
+        dialogWindow.Repaint();
     }
 
     public static void ConfigureDeepLinks(string scheme, string host, string pathPrefix)
@@ -130,7 +188,6 @@ public static class SeedsIntegration
         pathPrefixAttribute.Value = pathPrefix;
 
         androidManifestDocument.Save(androidManifestPath);
-
         #else
         #error Unsupported Unity3D version, please contact support.
         #endif
