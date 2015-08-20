@@ -1,0 +1,5 @@
+<SeedsSDK>
+  <iOS>
+    <DeepLinking scheme="seeds" host="demo" pathPrefix="" />
+  </iOS>
+</SeedsSDK>
