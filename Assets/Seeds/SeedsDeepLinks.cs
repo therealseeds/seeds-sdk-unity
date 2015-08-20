@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITY_IOS && !UNITY_EDITOR
+using System.Runtime.InteropServices;
+#endif
 using UnityEngine;
 
 public class SeedsDeepLinks : MonoBehaviour
@@ -11,6 +14,11 @@ public class SeedsDeepLinks : MonoBehaviour
     /// True if trace should be enabled, false otherwise.
     /// </summary>
     public bool TraceEnabled = false;
+
+    /// <summary>
+    /// True if should use Unity3D plugin system.
+    /// </summary>
+    public bool RegisterAsPlugin = true;
 
     public event Action<string> OnLinkArrived;
 
@@ -28,6 +36,14 @@ public class SeedsDeepLinks : MonoBehaviour
         Instance = this;
     }
 
+    #if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void SeedsDeepLinks_SetGameObjectName(string gameObjectName);
+
+    [DllImport ("__Internal")]
+    private static extern void SeedsDeepLinks_Setup(bool registerAsPlugin);
+    #endif
+
     void Start()
     {
         #if UNITY_ANDROID && !UNITY_EDITOR
@@ -35,6 +51,9 @@ public class SeedsDeepLinks : MonoBehaviour
         {
             deepLinkActivityClass.CallStatic("setGameObjectName", gameObject.name);
         }
+        #elif UNITY_IOS && !UNITY_EDITOR
+        SeedsDeepLinks_SetGameObjectName(gameObject.name);
+        SeedsDeepLinks_Setup(RegisterAsPlugin);
         #endif
     }
 

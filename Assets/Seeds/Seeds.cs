@@ -59,10 +59,10 @@ public class Seeds : MonoBehaviour
 
     #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
-    private static extern void Seeds_Setup();
+    private static extern void Seeds_SetGameObjectName(string gameObjectName);
 
     [DllImport ("__Internal")]
-    private static extern void Seeds_SetGameObjectName(string gameObjectName);
+    private static extern void Seeds_Setup(bool registerAsPlugin);
     #endif
 
     void Start()
@@ -77,8 +77,8 @@ public class Seeds : MonoBehaviour
             androidBridgeInstance = inAppMessageListenerBridgeClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
         }
         #elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_Setup();
         Seeds_SetGameObjectName(gameObject.name);
+        Seeds_Setup(false);
         #endif
 
         if (AutoInitialize)

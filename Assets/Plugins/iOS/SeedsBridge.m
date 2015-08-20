@@ -1,7 +1,58 @@
 #import <Foundation/Foundation.h>
-#import "UnityInterface.h"
+#import "SeedsBridge.h"
 #import "Seeds.h"
 #import "SeedsInAppMessageDelegate.h"
+#import "UnityInterface.h"
+#include "SeedsConfig.h"
+
+@interface SeedsDeepLinks ()
+
+@property (nonatomic, copy) NSString *gameObjectName;
+
+- (void)onOpenURL:(NSNotification*)notification;
+
+@end
+
+@implementation SeedsDeepLinks
+
+@synthesize gameObjectName;
+
++ (instancetype)sharedInstance
+{
+    static SeedsDeepLinks *s_sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{s_sharedInstance = self.new;});
+    return s_sharedInstance;
+}
+
+- (instancetype)init
+{
+    if (self = [super init])
+    {
+        self.gameObjectName = nil;
+    }
+    return self;
+}
+
+- (BOOL)openDeepLink:(NSURL *)url
+{
+    if (url == nil)
+        return NO;
+
+    if (![[url scheme] isEqualToString:SEEDS_DeepLinking_scheme])
+        return NO;
+
+    if (![[url host] isEqualToString:SEEDS_DeepLinking_host])
+        return NO;
+
+    if ([SEEDS_DeepLinking_pathPrefix length] > 0 && ![[url path] hasPrefix:SEEDS_DeepLinking_pathPrefix])
+        return NO;
+
+    UnitySendMessage([self.gameObjectName UTF8String], "onLinkArrived", [[url absoluteString] UTF8String]);
+    return YES;
+}
+
+@end
 
 @interface SeedsInAppMessageDelegateProxy : NSObject <SeedsInAppMessageDelegate>
 
@@ -63,15 +114,27 @@
 
 @end
 
-void Seeds_Setup()
+void SeedsDeepLinks_SetGameObjectName(const char* pcsGameObjectName)
 {
-    [Seeds sharedInstance].inAppMessageDelegate = SeedsInAppMessageDelegateProxy.sharedInstance;
+    NSString* gameObjectName = [NSString stringWithUTF8String:pcsGameObjectName];
+    SeedsDeepLinks.sharedInstance.gameObjectName = gameObjectName;
+}
+
+void SeedsDeepLinks_Setup(BOOL registerAsPlugin)
+{
+    if (registerAsPlugin)
+        [SeedsDeepLinks.sharedInstance performSelector:@selector(registerAsPlugin)];
 }
 
 void Seeds_SetGameObjectName(const char* pcsGameObjectName)
 {
     NSString* gameObjectName = [NSString stringWithUTF8String:pcsGameObjectName];
     SeedsInAppMessageDelegateProxy.sharedInstance.gameObjectName = gameObjectName;
+}
+
+void Seeds_Setup()
+{
+    [Seeds sharedInstance].inAppMessageDelegate = SeedsInAppMessageDelegateProxy.sharedInstance;
 }
 
 void Seeds_Init(const char* pcsServerUrl, const char* pcsAppKey)
