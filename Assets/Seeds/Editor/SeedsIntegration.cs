@@ -287,4 +287,50 @@ public static class SeedsIntegration
             EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android ||
             EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS;
     }
+
+    [PostProcessBuild(1)]
+    public static void PostProcessBuild(BuildTarget target, string pathToBuiltProject)
+    {
+        if (target != BuildTarget.iOS)
+            return;
+
+        Debug.Log("[Seeds] Going to post-process project in '" + pathToBuiltProject + "'");
+
+        var seedsSettingsXml = new XmlDocument();
+        var seedsSettingsFilename = Path.Combine(Application.dataPath, "../ProjectSettings/SeedsSDK.xml");
+        if (File.Exists(seedsSettingsFilename))
+            seedsSettingsXml.Load(seedsSettingsFilename);
+
+        var deepLinkingNode = seedsSettingsXml.SelectSingleNode("SeedsSDK/iOS/DeepLinking");
+
+        var scheme = "";
+        var pathPrefix = "";
+        var host = "";
+        if (deepLinkingNode != null)
+        {
+            var schemeAttribute = deepLinkingNode.Attributes.GetNamedItem("scheme");
+            if (schemeAttribute != null)
+                scheme = schemeAttribute.Value;
+
+            var hostAttribute = deepLinkingNode.Attributes.GetNamedItem("host");
+            if (hostAttribute != null)
+                host = hostAttribute.Value;
+
+            var pathPrefixAttribute = deepLinkingNode.Attributes.GetNamedItem("pathPrefix");
+            if (pathPrefixAttribute != null)
+                pathPrefix = pathPrefixAttribute.Value;
+        }
+
+        var seedsConfigFilename = Path.Combine(pathToBuiltProject, "Libraries/Plugins/iOS/SeedsConfig.h");
+        using (var seedsConfigFile = File.Open(seedsConfigFilename, FileMode.Create))
+        {
+            using (var seedsConfig = new StreamWriter(seedsConfigFile))
+            {
+                seedsConfig.WriteLine("// DeepLinking");
+                seedsConfig.WriteLine("#define SEEDS_DeepLinking_scheme @\"{0}\"", scheme);
+                seedsConfig.WriteLine("#define SEEDS_DeepLinking_host @\"{0}\"", host);
+                seedsConfig.WriteLine("#define SEEDS_DeepLinking_pathPrefix @\"{0}\"", pathPrefix);
+            }
+        }
+    }
 }
