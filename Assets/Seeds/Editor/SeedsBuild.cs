@@ -194,6 +194,7 @@ public static class SeedsBuild
                             }
                             else if (
                                 (zipEntry.Attributes & FileAttributes.Directory) == 0 &&
+                                Path.GetFileName(zipEntry.FileName).Length > 0 &&
                                 (zipEntry.FileName.StartsWith("res/") || zipEntry.FileName.StartsWith("assets/")))
                             {
                                 var targetFilepath = Path.Combine(androidPluginsPath, zipEntry.FileName);
