@@ -143,7 +143,7 @@ extern NSString* const kCLYUserCustom;
  For Seeds CrashReporting, you'll need to add one more line of Seeds code to your application:
  
  For iOS, inside `application:didFinishLaunchingWithOptions:` method, just after the line you started Seeds, add this line:
- `[[Seeds sharedInstance] startCrashReporting];`
+ `[Seeds.sharedInstance startCrashReporting];`
  
  With this one line of code, Seeds iOS SDK will generate a crash report if your application crashes due to an exception, and send it to Seeds Server for further inspection. If a crash report can not be delivered to server (i.e. no internet connection, unavailable server), the SDK stores the crash report locally in order to try again later.
  

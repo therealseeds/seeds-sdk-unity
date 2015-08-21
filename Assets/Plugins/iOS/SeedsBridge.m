@@ -45,7 +45,7 @@
     if (![[url host] isEqualToString:SEEDS_DeepLinking_host])
         return NO;
 
-    if ([SEEDS_DeepLinking_pathPrefix length] > 0 && ![[url path] hasPrefix:SEEDS_DeepLinking_pathPrefix])
+    if ([SEEDS_DeepLinking_pathPrefix length] > 1 && ![[url path] hasPrefix:SEEDS_DeepLinking_pathPrefix])
         return NO;
 
     UnitySendMessage([self.gameObjectName UTF8String], "onLinkArrived", [[url absoluteString] UTF8String]);

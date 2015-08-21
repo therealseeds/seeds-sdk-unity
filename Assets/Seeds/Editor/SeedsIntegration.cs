@@ -103,14 +103,14 @@ public static class SeedsIntegration
 
     public static void ConfigureDeepLinks(string scheme, string host, string pathPrefix)
     {
+        // Add slash to prefix if needed
+        if (pathPrefix == null)
+            pathPrefix = "/";
+        else if (pathPrefix.Length > 0 && pathPrefix[0] != '/')
+            pathPrefix = "/" + pathPrefix;
+
         if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
         {
-            // Add slash to prefix if needed
-            if (pathPrefix == null)
-                pathPrefix = "/";
-            else if (pathPrefix.Length > 0 && pathPrefix[0] != '/')
-                pathPrefix = "/" + pathPrefix;
-
             var deepLinkAndroidManifestContent = string.Format(@"
                 <manifest xmlns:android=""http://schemas.android.com/apk/res/android""
                     package=""com.playseeds.unity3d.androidbridge.deeplinks"">
