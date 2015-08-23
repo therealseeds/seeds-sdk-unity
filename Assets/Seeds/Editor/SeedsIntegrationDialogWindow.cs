@@ -10,9 +10,9 @@ public class SeedsIntegrationDialogWindow : EditorWindow
     void OnGUI()
     {
         GUILayout.Label("Deep Link URL", EditorStyles.boldLabel);
-        Scheme = EditorGUILayout.TextField("Scheme", Scheme);
+        Scheme = EditorGUILayout.TextField("Game Name", Scheme);
         Host = EditorGUILayout.TextField("Host", Host);
-        PathPrefix = EditorGUILayout.TextField("Path prefix", PathPrefix);
+        PathPrefix = EditorGUILayout.TextField("Item Name", PathPrefix);
 
         if (GUILayout.Button("Configure"))
         {
