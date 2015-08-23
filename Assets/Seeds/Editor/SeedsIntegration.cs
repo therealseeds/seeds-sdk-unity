@@ -15,9 +15,9 @@ public static class SeedsIntegration
     {
         var dialogWindow = EditorWindow.GetWindow<SeedsIntegrationDialogWindow>(true, "Seeds SDK", true);
 
-        var scheme = "your-unique-game-name";
-        var host = "seeds";
-        var pathPrefix = "item1";
+        var scheme = "seeds";
+        var host = PlayerSettings.bundleIdentifier;
+        var pathPrefix = string.Empty;
 
         if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
         {
