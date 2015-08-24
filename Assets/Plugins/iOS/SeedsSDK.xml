@@ -1,5 +1,5 @@
 <SeedsSDK>
   <iOS>
-    <DeepLinking scheme="seeds" host="demo" pathPrefix="" />
+    <DeepLinking scheme="your-unique-game-name" host="seeds" pathPrefix="item-name" />
   </iOS>
 </SeedsSDK>

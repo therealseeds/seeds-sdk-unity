@@ -26,14 +26,14 @@ public class SeedsIntegrationDialogWindow : EditorWindow
         Scheme = Scheme.Trim();
         if (string.IsNullOrEmpty(Scheme))
         {
-            EditorUtility.DisplayDialog("Unable configure deep links", "Please specify a valid scheme.", "Close");
+            EditorUtility.DisplayDialog("Unable to configure deep links", "Please specify a valid scheme.", "Close");
             return;
         }
 
         Host = Host.Trim();
         if (string.IsNullOrEmpty(Host))
         {
-            EditorUtility.DisplayDialog("Unable configure deep links", "Please specify a valid host.", "Close");
+            EditorUtility.DisplayDialog("Unable to configure deep links", "Please specify a valid host.", "Close");
             return;
         }
 

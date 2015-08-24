@@ -105,9 +105,9 @@ public static class SeedsIntegration
     {
         // Add slash to prefix if needed
         if (pathPrefix == null)
-            pathPrefix = "/";
+            pathPrefix = "";
         else if (pathPrefix.Length > 0 && pathPrefix[0] != '/')
-            pathPrefix = "/" + pathPrefix;
+            pathPrefix = pathPrefix;
 
         if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
         {
