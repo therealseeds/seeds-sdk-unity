@@ -18,6 +18,7 @@ public static class SeedsIntegration
         var scheme = "your unique game name";
         var host = "seeds";
         var pathPrefix = "item name";
+		var displayPathPrefix = pathPrefix;
 
         if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
         {
@@ -94,9 +95,14 @@ public static class SeedsIntegration
             }
         }
 
-        dialogWindow.Scheme = scheme;
+		// Remove slash from prefix for display
+		if (pathPrefix.Length > 0 && pathPrefix [0] == '/') {
+			displayPathPrefix = pathPrefix.Substring(1);
+		}
+
+		dialogWindow.Scheme = scheme;
         dialogWindow.Host = host;
-        dialogWindow.PathPrefix = pathPrefix;
+        dialogWindow.PathPrefix = displayPathPrefix;
 
         dialogWindow.Repaint();
     }
