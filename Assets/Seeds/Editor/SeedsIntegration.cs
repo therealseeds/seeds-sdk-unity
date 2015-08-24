@@ -104,10 +104,10 @@ public static class SeedsIntegration
     public static void ConfigureDeepLinks(string scheme, string host, string pathPrefix)
     {
         // Add slash to prefix if needed
-//        if (pathPrefix == null)
-//            pathPrefix = "";
-//        else if (pathPrefix.Length > 0 && pathPrefix[0] != '/')
-//            pathPrefix = pathPrefix;
+        if (pathPrefix == null)
+            pathPrefix = "/";
+        else if (pathPrefix.Length > 0 && pathPrefix[0] != '/')
+            pathPrefix = "/" + pathPrefix;
 
         if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
         {
