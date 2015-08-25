@@ -7,7 +7,7 @@
 //
 // Changed by Oleksii Pelykh
 //
-// Changes: renamed from 'Seeds';
+// Changes: renamed to 'Seeds';
 //
 
 #import <Foundation/Foundation.h>
@@ -29,7 +29,7 @@
 
 @property (readonly, nonatomic, copy) NSString* deviceId;
 @property (atomic, retain) id<SeedsInAppMessageDelegate> inAppMessageDelegate;
-@property (atomic, assign) BOOL inAppMessageABTestingEnabled;
+
 @property (atomic, assign) BOOL inAppMessageDoNotShow;
 @property (atomic, copy) NSString* inAppMessageVariantName;
 

@@ -23,7 +23,7 @@ public class Seeds : MonoBehaviour
     /// <summary>
     /// Server URL. Do not include trailing slash.
     /// </summary>
-    private string ServerURL = "http://dash.playseeds.com";
+    private string ServerURL = "http://devdash.playseeds.com";
 
     /// <summary>
     /// Application API key.
@@ -555,45 +555,45 @@ public class Seeds : MonoBehaviour
         return this;
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
-    [DllImport ("__Internal")]
-    private static extern bool Seeds_GetABTestingOn();
-    #endif
-
-    public bool IsABTestingOn
-    {
-        get
-        {
-            #if UNITY_ANDROID && !UNITY_EDITOR
-            return androidInstance.Call<bool>("isA_bTestingOn");
-            #elif UNITY_IOS && !UNITY_EDITOR
-            return Seeds_GetABTestingOn();
-            #else
-            NotImplemented("IsABTestingOn::get");
-            return false;
-            #endif
-        }
-        set
-        {
-            SetABTestingOn(value);
-        }
-    }
-
-    #if UNITY_IOS && !UNITY_EDITOR
-    [DllImport ("__Internal")]
-    private static extern void Seeds_SetABTestingOn(bool abTestingOn);
-    #endif
-
-    public void SetABTestingOn(bool abTestingOn)
-    {
-        #if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("setA_bTestingOn", abTestingOn);
-        #elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_SetABTestingOn(abTestingOn);
-        #else
-        NotImplemented("SetABTestingOn(bool abTestingOn)");
-        #endif
-    }
+//    #if UNITY_IOS && !UNITY_EDITOR
+//    [DllImport ("__Internal")]
+//    private static extern bool Seeds_GetABTestingOn();
+//    #endif
+//
+//    public bool IsABTestingOn
+//    {
+//        get
+//        {
+//            #if UNITY_ANDROID && !UNITY_EDITOR
+//            return androidInstance.Call<bool>("isA_bTestingOn");
+//            #elif UNITY_IOS && !UNITY_EDITOR
+//            return Seeds_GetABTestingOn();
+//            #else
+//            NotImplemented("IsABTestingOn::get");
+//            return false;
+//            #endif
+//        }
+//        set
+//        {
+//            SetABTestingOn(value);
+//        }
+//    }
+//
+//    #if UNITY_IOS && !UNITY_EDITOR
+//    [DllImport ("__Internal")]
+//    private static extern void Seeds_SetABTestingOn(bool abTestingOn);
+//    #endif
+//
+//    public void SetABTestingOn(bool abTestingOn)
+//    {
+//        #if UNITY_ANDROID && !UNITY_EDITOR
+//        androidInstance.Call("setA_bTestingOn", abTestingOn);
+//        #elif UNITY_IOS && !UNITY_EDITOR
+//        Seeds_SetABTestingOn(abTestingOn);
+//        #else
+//        NotImplemented("SetABTestingOn(bool abTestingOn)");
+//        #endif
+//    }
 
     #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]

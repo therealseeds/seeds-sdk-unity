@@ -41,7 +41,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TraceEnabled: 0
   AutoInitialize: 1
-  ServerURL: http://devdash.playseeds.com
+  ServerURL: http://dash.playseeds.com
   ApplicationKey: test
 --- !u!1001 &100100000
 Prefab:
@@ -52,7 +52,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 0}
       propertyPath: ServerURL
-      value: http://devdash.playseeds.com
+      value: http://dash.playseeds.com
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

@@ -197,15 +197,15 @@ void Seeds_EnableCrashReporting()
     [Seeds.sharedInstance startCrashReporting];
 }
 
-BOOL Seeds_GetABTestingOn()
-{
-    return Seeds.sharedInstance.inAppMessageABTestingEnabled;
-}
-
-void Seeds_SetABTestingOn(BOOL abTestingOn)
-{
-    Seeds.sharedInstance.inAppMessageABTestingEnabled = abTestingOn;
-}
+//BOOL Seeds_GetABTestingOn()
+//{
+//    return Seeds.sharedInstance.inAppMessageABTestingEnabled;
+//}
+//
+//void Seeds_SetABTestingOn(BOOL abTestingOn)
+//{
+//    Seeds.sharedInstance.inAppMessageABTestingEnabled = abTestingOn;
+//}
 
 void Seeds_SetMessageVariantName(const char* pcsMessageVariantName)
 {
