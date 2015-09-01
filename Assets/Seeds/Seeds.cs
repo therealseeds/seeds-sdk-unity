@@ -154,7 +154,7 @@ public class Seeds : MonoBehaviour
 
     private static void NotImplemented(string method)
     {
-        Debug.LogWarning(string.Format("Method {0} not implemented for current platform", method));
+        Debug.LogWarning(string.Format("Method {0} not implemented for current platform. Please build for iOS or Android to test.", method));
     }
 
     void inAppMessageClicked(string notUsed)
