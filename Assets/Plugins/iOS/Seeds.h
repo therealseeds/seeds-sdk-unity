@@ -31,6 +31,7 @@
 @property (atomic, retain) id<SeedsInAppMessageDelegate> inAppMessageDelegate;
 
 @property (atomic, assign) BOOL inAppMessageDoNotShow;
+@property (atomic, assign) BOOL adClicked;
 @property (atomic, copy) NSString* inAppMessageVariantName;
 
 + (instancetype)sharedInstance;
@@ -64,6 +65,8 @@ extern NSString* const kCLYUserCustom;
 - (void)recordIAPEvent:(NSString *)key price:(double)price;
 
 - (void)recordSeedsIAPEvent:(NSString *)key price:(double)price;
+
+- (void)trackPurchase:(NSString *)key price:(double)price;
 
 - (void)requestInAppMessage;
 

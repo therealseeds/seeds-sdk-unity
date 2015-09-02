@@ -386,6 +386,26 @@ public class Seeds : MonoBehaviour
         #endif
     }
 
+// new 
+
+	#if UNITY_IOS && !UNITY_EDITOR
+	[DllImport ("__Internal")]
+	private static extern void Seeds_TrackPurchase(string key, double price);
+	#endif
+	
+	public void TrackPurchase(string key, double price)
+	{
+		#if UNITY_ANDROID && !UNITY_EDITOR
+		androidInstance.Call("trackPurchase", key, price);
+		#elif UNITY_IOS && !UNITY_EDITOR
+		Seeds_TrackPurchase(key, price);
+		#else
+		NotImplemented("TrackPurchase(string key, double price)");
+		#endif
+	}
+
+//
+
     #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_RecordSeedsIAPEvent(string key, double price);

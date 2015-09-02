@@ -187,6 +187,12 @@ void Seeds_RecordSeedsIAPEvent(const char* pcsKey, double price)
     [Seeds.sharedInstance recordSeedsIAPEvent:key price:price];
 }
 
+void Seeds_TrackPurchase(const char* pcsKey, double price)
+{
+    NSString* key = [NSString stringWithUTF8String:pcsKey];
+    [Seeds.sharedInstance trackPurchase:key price:price];
+}
+
 void Seeds_SetLocation(double lat, double lon)
 {
     [Seeds.sharedInstance setLocation:lat longitude:lon];

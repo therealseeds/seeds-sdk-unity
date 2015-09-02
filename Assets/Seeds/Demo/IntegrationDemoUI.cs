@@ -16,6 +16,7 @@ public class IntegrationDemoUI : MonoBehaviour
     public void RecordIAPEvent1()
     {
         Seeds.Instance.RecordIAPEvent("iap event 1", 9.99);
+
     }
 
     public void RecordSeedsIAPEvent1()
