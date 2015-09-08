@@ -44,10 +44,12 @@ public static class SeedsIntegration
                     }
                 }
             }
-            #elif UNITY_4
+            #elif UNITY_4_6 || UNITY_4_5
             var androidManifestFilename = Path.Combine(Application.dataPath, "Plugins/Android/AndroidManifest.xml");
             if (File.Exists(androidManifestFilename))
                 androidManifestDocument.Load(androidManifestFilename);
+            #else
+            #error Unsupported Unity3D version, please contact support.
             #endif
 
             var manifestNsManager = new XmlNamespaceManager(androidManifestDocument.NameTable);
@@ -70,7 +72,11 @@ public static class SeedsIntegration
                 pathPrefix = pathPrefixAttribute.Value;
             }
         }
+        #if UNITY_4_6 || UNITY_4_5
+        else if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.iPhone)
+        #else
         else if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS)
+        #endif
         {
             var seedsSettingsXml = new XmlDocument();
             var seedsSettingsFilename = Path.Combine(Application.dataPath, "../ProjectSettings/SeedsSDK.xml");
@@ -186,7 +192,7 @@ public static class SeedsIntegration
 
                 seedsDeepLinksAar.Save(Path.Combine(Application.dataPath, "Plugins/Android/SeedsDeepLinks.aar"));
             }
-            #elif UNITY_4
+            #elif UNITY_4_6 || UNITY_4_5
             // For Unity3D 4.x only AndroidManifest.xml modification is needed
 
             var androidManifestPath = Path.Combine(Application.dataPath, "Plugins/Android/AndroidManifest.xml");
@@ -229,7 +235,11 @@ public static class SeedsIntegration
             #error Unsupported Unity3D version, please contact support.
             #endif
         }
+        #if UNITY_4_6 || UNITY_4_5
+        else if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.iPhone)
+        #else
         else if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS)
+        #endif
         {
             var seedsSettingsXml = new XmlDocument();
             var seedsSettingsFilename = Path.Combine(Application.dataPath, "../ProjectSettings/SeedsSDK.xml");
@@ -291,14 +301,25 @@ public static class SeedsIntegration
     {
         return
             EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android ||
-            EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS;
+            #if UNITY_4_6 || UNITY_4_5
+            EditorUserBuildSettings.activeBuildTarget == BuildTarget.iPhone
+            #else
+            EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS
+            #endif
+            ;
     }
 
     [PostProcessBuild(1)]
     public static void PostProcessBuild(BuildTarget target, string pathToBuiltProject)
     {
+        #if UNITY_4_6 || UNITY_4_5
+        if (target != BuildTarget.iPhone)
+        #else
         if (target != BuildTarget.iOS)
+        #endif
+        {
             return;
+        }
 
         Debug.Log("[Seeds] Going to post-process project in '" + pathToBuiltProject + "'");
 
@@ -327,7 +348,14 @@ public static class SeedsIntegration
                 pathPrefix = pathPrefixAttribute.Value;
         }
 
-        var seedsConfigFilename = Path.Combine(pathToBuiltProject, "Libraries/Plugins/iOS/SeedsConfig.h");
+        #if UNITY_5
+        var seedsConfigPathInProject = "Libraries/Plugins/iOS";
+        #elif UNITY_4_6 || UNITY_4_5
+        var seedsConfigPathInProject = "Libraries";
+        #else
+        #error Unsupported Unity3D version, please contact support.
+        #endif
+        var seedsConfigFilename = Path.Combine(pathToBuiltProject, Path.Combine(seedsConfigPathInProject, "SeedsConfig.h"));
         using (var seedsConfigFile = File.Open(seedsConfigFilename, FileMode.Create))
         {
             using (var seedsConfig = new StreamWriter(seedsConfigFile))

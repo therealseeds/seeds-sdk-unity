@@ -36,6 +36,7 @@ public static class SeedsBuild
             assetsToExport.Add("Assets/Seeds/Seeds.prefab");
             assetsToExport.Add("Assets/Seeds/SeedsDeepLinks.cs");
             assetsToExport.Add("Assets/Seeds/SeedsDeepLinks.prefab");
+            assetsToExport.Add("Assets/Seeds/Documentation.pdf");
             assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegration.cs");
             assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegrationDialogWindow.cs");
             assetsToExport.Add("Assets/Seeds/Editor/Ionic.Zip.dll");
@@ -262,6 +263,7 @@ public static class SeedsBuild
             assetsToExport.Add("Assets/Seeds/Seeds.prefab");
             assetsToExport.Add("Assets/Seeds/SeedsDeepLinks.cs");
             assetsToExport.Add("Assets/Seeds/SeedsDeepLinks.prefab");
+            assetsToExport.Add("Assets/Seeds/Documentation.pdf");
             assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegration.cs");
             assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegrationDialogWindow.cs");
             assetsToExport.Add("Assets/Seeds/Editor/Ionic.Zip.dll");
