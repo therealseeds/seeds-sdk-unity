@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -323,6 +324,8 @@ public static class SeedsIntegration
 
         Debug.Log("[Seeds] Going to post-process project in '" + pathToBuiltProject + "'");
 
+        var projectPath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+
         var seedsSettingsXml = new XmlDocument();
         var seedsSettingsFilename = Path.Combine(Application.dataPath, "../ProjectSettings/SeedsSDK.xml");
         if (File.Exists(seedsSettingsFilename))
@@ -348,6 +351,7 @@ public static class SeedsIntegration
                 pathPrefix = pathPrefixAttribute.Value;
         }
 
+        // Write SeedsConfig.h
         #if UNITY_5
         var seedsConfigPathInProject = "Libraries/Plugins/iOS";
         #elif UNITY_4_6 || UNITY_4_5
@@ -365,6 +369,140 @@ public static class SeedsIntegration
                 seedsConfig.WriteLine("#define SEEDS_DeepLinking_host @\"{0}\"", host);
                 seedsConfig.WriteLine("#define SEEDS_DeepLinking_pathPrefix @\"{0}\"", pathPrefix);
             }
+        }
+
+        // Convert "Unity-iPhone.xcodeproj/project.pbxproj" to xml1 format using plutil
+        System.Diagnostics.Process
+            .Start(new System.Diagnostics.ProcessStartInfo("plutil") {
+                Arguments = "-convert xml1 \"Unity-iPhone.xcodeproj/project.pbxproj\"",
+                UseShellExecute = true,
+                WorkingDirectory = pathToBuiltProject })
+            .WaitForExit();
+
+        // Read pbxproj as XML
+        var pbxprojFilename = Path.Combine(pathToBuiltProject, "Unity-iPhone.xcodeproj/project.pbxproj");
+        var pbxproj = new XmlDocument();
+        pbxproj.Load(pbxprojFilename);
+        var objectsNode = pbxproj.SelectSingleNode("/plist/dict/key[text()=\"objects\"]/following-sibling::*[1]");
+        var targetNode = pbxproj.SelectSingleNode(
+            "//dict[" +
+            "key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXNativeTarget\" and " +
+            "key[text()=\"name\"]/following-sibling::*[1]/text()=\"Unity-iPhone\"" +
+            "]");
+        var targetBuildPhasesKeyNodes =
+            targetNode.SelectNodes("//key[text()=\"buildPhases\"]/following-sibling::*[1]/string/text()");
+        var buildPhaseNodes =
+            pbxproj.SelectNodes("//dict[key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXResourcesBuildPhase\"]");
+
+        #if UNITY_4_6 || UNITY_4_5
+        // Copy SeedsResources.bundle
+        var seedsResourcesPathInAssets = "Assets/Plugins/iOS/SeedsResources.bundle/";
+        var seedsResources = AssetDatabase.GetAllAssetPaths()
+            .Where(x => x.StartsWith(seedsResourcesPathInAssets))
+            .ToList();
+        var seedsResourcesPathInProject = "Libraries/SeedsResources.bundle";
+        var seedsResourcesPath = Path.Combine(pathToBuiltProject, seedsResourcesPathInProject);
+        Directory.CreateDirectory(seedsResourcesPath);
+        foreach (var seedsResourcePath in seedsResources)
+        {
+            var srcPath = Path.Combine(projectPath, seedsResourcePath);
+            var dstPath = Path.Combine(projectPath, seedsResourcePath.Replace(seedsResourcesPathInAssets, ""));
+            var attributes = File.GetAttributes(srcPath);
+
+            if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                Directory.CreateDirectory(dstPath);
+            else if (!File.Exists(dstPath))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(dstPath));
+                File.Copy(srcPath, dstPath);
+            }
+        }
+
+        // Add SeedsResources.bundle to the project
+        var seedsResourcesFileRefKey = GeneratePbxprojKey(pbxproj);
+        objectsNode.AppendChildElement("key", seedsResourcesFileRefKey);
+        var seedsResourcesFileRefNode = objectsNode.AppendChildElement("dict");
+        seedsResourcesFileRefNode.AppendChildElement("key", "isa");
+        seedsResourcesFileRefNode.AppendChildElement("string", "PBXFileReference");
+        seedsResourcesFileRefNode.AppendChildElement("key", "lastKnownFileType");
+        seedsResourcesFileRefNode.AppendChildElement("string", "wrapper.plug-in");
+        seedsResourcesFileRefNode.AppendChildElement("key", "name");
+        seedsResourcesFileRefNode.AppendChildElement("string", "SeedsResources.bundle");
+        seedsResourcesFileRefNode.AppendChildElement("key", "path");
+        seedsResourcesFileRefNode.AppendChildElement("string", seedsResourcesPathInProject);
+        seedsResourcesFileRefNode.AppendChildElement("key", "sourceTree");
+        seedsResourcesFileRefNode.AppendChildElement("string", "SOURCE_ROOT");
+
+        var seedsResourcesBuildFileKey = GeneratePbxprojKey(pbxproj);
+        objectsNode.AppendChildElement("key", seedsResourcesBuildFileKey);
+        var seedsResourcesBuildFileNode = objectsNode.AppendChildElement("dict");
+        seedsResourcesBuildFileNode.AppendChildElement("key", "fileRef");
+        seedsResourcesBuildFileNode.AppendChildElement("string", seedsResourcesFileRefKey);
+        seedsResourcesBuildFileNode.AppendChildElement("key", "isa");
+        seedsResourcesBuildFileNode.AppendChildElement("string", "PBXBuildFile");
+
+        var librariesGroupChildrenNode = pbxproj.SelectSingleNode(
+            "//dict[" +
+            "key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXGroup\" and " +
+            "key[text()=\"path\"]/following-sibling::*[1]/text()=\"Libraries\"" +
+            "]/key[text()=\"children\"]/following-sibling::*[1]");
+        librariesGroupChildrenNode.AppendChildElement("string", seedsResourcesFileRefKey);
+        
+                XmlNode resourcesBuildPhaseNode = null;
+        foreach (XmlNode buildPhaseNode in buildPhaseNodes)
+        {
+            var key = buildPhaseNode.PreviousSibling.FirstChild.Value;
+            foreach (XmlNode targetBuildPhasesKeyNode in targetBuildPhasesKeyNodes)
+            {
+                if (targetBuildPhasesKeyNode.Value == key)
+                {
+                    resourcesBuildPhaseNode = buildPhaseNode;
+                    break;
+                }
+            }
+
+            if (resourcesBuildPhaseNode != null)
+                break;
+        }
+        resourcesBuildPhaseNode
+            .SelectSingleNode("key[text()=\"files\"]/following-sibling::*[1]")  
+            .AppendChildElement("string", seedsResourcesBuildFileKey);
+        #endif
+
+        //TODO: Find and modify project plist file
+                //TODO: Add -ObjC flag to the project
+                //TODO: Add CoreData and CoreTelephony frameworks
+
+        // Save pbxproj as XML and fix it
+        var xmlWriterSettings = new XmlWriterSettings
+        {
+            Indent = false,
+            NewLineHandling = NewLineHandling.None
+        };
+        using (var xmlWriter = XmlWriter.Create(pbxprojFilename, xmlWriterSettings))
+        {
+            pbxproj.Save(xmlWriter);
+        }
+        var pbxprojContent = File.ReadAllText(pbxprojFilename);
+        pbxprojContent = pbxprojContent
+            .Replace(
+                "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"[]>",
+                "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
+        File.WriteAllText(pbxprojFilename, pbxprojContent);
+    }
+
+    private static string GeneratePbxprojKey(XmlDocument pbxproj)
+    {
+        var keyBytes = new byte[12];
+        var random = new System.Random();
+        for (;;)
+        {
+            random.NextBytes(keyBytes);
+            var key = BitConverter.ToString(keyBytes).Replace("-", "").ToUpper();
+
+            var conflictingKeyNode = pbxproj.SelectSingleNode(string.Format("//key[text()=\"{0}\"]", key));
+            if (conflictingKeyNode == null)
+                return key;
         }
     }
 }

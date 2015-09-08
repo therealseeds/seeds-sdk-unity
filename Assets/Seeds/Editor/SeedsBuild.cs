@@ -39,6 +39,7 @@ public static class SeedsBuild
             assetsToExport.Add("Assets/Seeds/Documentation.pdf");
             assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegration.cs");
             assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegrationDialogWindow.cs");
+            assetsToExport.Add("Assets/Seeds/Editor/SeedsUtilities.cs");
             assetsToExport.Add("Assets/Seeds/Editor/Ionic.Zip.dll");
             assetsToExport.AddRange(allAssets.Where(x =>
                 x.StartsWith("Assets/Plugins") &&
@@ -266,6 +267,7 @@ public static class SeedsBuild
             assetsToExport.Add("Assets/Seeds/Documentation.pdf");
             assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegration.cs");
             assetsToExport.Add("Assets/Seeds/Editor/SeedsIntegrationDialogWindow.cs");
+            assetsToExport.Add("Assets/Seeds/Editor/SeedsUtilities.cs");
             assetsToExport.Add("Assets/Seeds/Editor/Ionic.Zip.dll");
             assetsToExport.AddRange(allAssets.Where(
                 x => x.StartsWith("Assets/Plugins") &&
