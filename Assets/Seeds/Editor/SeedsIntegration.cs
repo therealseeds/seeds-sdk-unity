@@ -311,7 +311,7 @@ public static class SeedsIntegration
             ;
     }
 
-    [PostProcessBuild(1)]
+    [PostProcessBuild(int.MaxValue)]
     public static void PostProcessBuild(BuildTarget target, string pathToBuiltProject)
     {
         #if UNITY_4_6 || UNITY_4_5
