@@ -448,7 +448,7 @@ public static class SeedsIntegration
             "]/key[text()=\"children\"]/following-sibling::*[1]");
         librariesGroupChildrenNode.AppendChildElement("string", seedsResourcesFileRefKey);
         
-                XmlNode resourcesBuildPhaseNode = null;
+        XmlNode resourcesBuildPhaseNode = null;
         foreach (XmlNode buildPhaseNode in buildPhaseNodes)
         {
             var key = buildPhaseNode.PreviousSibling.FirstChild.Value;
@@ -469,8 +469,37 @@ public static class SeedsIntegration
             .AppendChildElement("string", seedsResourcesBuildFileKey);
         #endif
 
-        //TODO: Find and modify project plist file
-                //TODO: Add -ObjC flag to the project
+        // Tweak build configurations
+        var buildConfigurationListKey = targetNode
+                .SelectSingleNode("key[text()=\"buildConfigurationList\"]/following-sibling::*[1]/text()")
+                .Value;
+        var buildConfigurationListNode = objectsNode.SelectSingleNode(
+                string.Format("key[text()=\"{0}\"]/following-sibling::*[1]", buildConfigurationListKey));
+        var buildConfigurationList =
+            buildConfigurationListNode.SelectNodes("key[text()=\"buildConfigurations\"]/following-sibling::*[1]/string/text()");
+        foreach (XmlNode buildConfigurationListEntry in buildConfigurationList)
+        {
+            var buildConfigurationKey = buildConfigurationListEntry.Value;
+            var buildConfigurationNode = objectsNode.SelectSingleNode(
+                string.Format("key[text()=\"{0}\"]/following-sibling::*[1]", buildConfigurationKey));
+
+            var buildSettings =
+                buildConfigurationNode.SelectSingleNode("key[text()=\"buildSettings\"]/following-sibling::*[1]");
+
+            var otherLinkerFlagsNode = buildSettings.SelectSingleNode("key[text()=\"OTHER_LDFLAGS\"]/following-sibling::*[1]");
+            if (otherLinkerFlagsNode == null)
+            {
+                buildSettings.AppendChildElement("key", "OTHER_LDFLAGS");
+                otherLinkerFlagsNode = buildSettings.AppendChildElement("array");
+            }
+            
+            // Add -ObjC flag to linker flags of the target
+            var objCFlagNode = otherLinkerFlagsNode.SelectSingleNode("string[text()=\"-ObjC\"]");
+            if (objCFlagNode == null)
+                objCFlagNode = otherLinkerFlagsNode.AppendChildElement("string", "-ObjC");
+        }
+
+                //TODO: Find and modify project plist file
                 //TODO: Add CoreData and CoreTelephony frameworks
 
         // Save pbxproj as XML and fix it
