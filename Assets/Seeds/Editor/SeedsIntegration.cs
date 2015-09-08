@@ -19,7 +19,7 @@ public static class SeedsIntegration
         var scheme = "your unique game name";
         var host = "seeds";
         var pathPrefix = "item name";
-		var displayPathPrefix = pathPrefix;
+        var displayPathPrefix = pathPrefix;
 
         if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
         {
@@ -102,12 +102,13 @@ public static class SeedsIntegration
             }
         }
 
-		// Remove slash from prefix for display
-		if (pathPrefix.Length > 0 && pathPrefix [0] == '/') {
-			displayPathPrefix = pathPrefix.Substring(1);
-		}
+        // Remove slash from prefix for display
+        if (pathPrefix.Length > 0 && pathPrefix[0] == '/')
+        {
+            displayPathPrefix = pathPrefix.Substring(1);
+        }
 
-		dialogWindow.Scheme = scheme;
+        dialogWindow.Scheme = scheme;
         dialogWindow.Host = host;
         dialogWindow.PathPrefix = displayPathPrefix;
 
@@ -373,10 +374,12 @@ public static class SeedsIntegration
 
         // Convert "Unity-iPhone.xcodeproj/project.pbxproj" to xml1 format using plutil
         System.Diagnostics.Process
-            .Start(new System.Diagnostics.ProcessStartInfo("plutil") {
+            .Start(new System.Diagnostics.ProcessStartInfo("plutil")
+            {
                 Arguments = "-convert xml1 \"Unity-iPhone.xcodeproj/project.pbxproj\"",
                 UseShellExecute = true,
-                WorkingDirectory = pathToBuiltProject })
+                WorkingDirectory = pathToBuiltProject
+            })
             .WaitForExit();
 
         // Read pbxproj as XML
@@ -385,14 +388,10 @@ public static class SeedsIntegration
         pbxproj.Load(pbxprojFilename);
         var objectsNode = pbxproj.SelectSingleNode("/plist/dict/key[text()=\"objects\"]/following-sibling::*[1]");
         var targetNode = pbxproj.SelectSingleNode(
-            "//dict[" +
-            "key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXNativeTarget\" and " +
-            "key[text()=\"name\"]/following-sibling::*[1]/text()=\"Unity-iPhone\"" +
-            "]");
-        var targetBuildPhasesKeyNodes =
-            targetNode.SelectNodes("//key[text()=\"buildPhases\"]/following-sibling::*[1]/string/text()");
-        var buildPhaseNodes =
-            pbxproj.SelectNodes("//dict[key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXResourcesBuildPhase\"]");
+             "//dict[" +
+             "key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXNativeTarget\" and " +
+             "key[text()=\"name\"]/following-sibling::*[1]/text()=\"Unity-iPhone\"" +
+             "]");
 
         #if UNITY_4_6 || UNITY_4_5
         // Copy SeedsResources.bundle
@@ -448,33 +447,19 @@ public static class SeedsIntegration
             "]/key[text()=\"children\"]/following-sibling::*[1]");
         librariesGroupChildrenNode.AppendChildElement("string", seedsResourcesFileRefKey);
         
-        XmlNode resourcesBuildPhaseNode = null;
-        foreach (XmlNode buildPhaseNode in buildPhaseNodes)
-        {
-            var key = buildPhaseNode.PreviousSibling.FirstChild.Value;
-            foreach (XmlNode targetBuildPhasesKeyNode in targetBuildPhasesKeyNodes)
-            {
-                if (targetBuildPhasesKeyNode.Value == key)
-                {
-                    resourcesBuildPhaseNode = buildPhaseNode;
-                    break;
-                }
-            }
-
-            if (resourcesBuildPhaseNode != null)
-                break;
-        }
-        resourcesBuildPhaseNode
-            .SelectSingleNode("key[text()=\"files\"]/following-sibling::*[1]")  
-            .AppendChildElement("string", seedsResourcesBuildFileKey);
+        AddFileReferenceToBuildPhase(pbxproj, "PBXResourcesBuildPhase", seedsResourcesBuildFileKey);
         #endif
+
+        // Add missing system frameworks
+        AddSystemFramework(pbxproj, "CoreData");
+        AddSystemFramework(pbxproj, "CoreTelephony");
 
         // Tweak build configurations
         var buildConfigurationListKey = targetNode
-                .SelectSingleNode("key[text()=\"buildConfigurationList\"]/following-sibling::*[1]/text()")
-                .Value;
+            .SelectSingleNode("key[text()=\"buildConfigurationList\"]/following-sibling::*[1]/text()")
+            .Value;
         var buildConfigurationListNode = objectsNode.SelectSingleNode(
-                string.Format("key[text()=\"{0}\"]/following-sibling::*[1]", buildConfigurationListKey));
+            string.Format("key[text()=\"{0}\"]/following-sibling::*[1]", buildConfigurationListKey));
         var buildConfigurationList =
             buildConfigurationListNode.SelectNodes("key[text()=\"buildConfigurations\"]/following-sibling::*[1]/string/text()");
         foreach (XmlNode buildConfigurationListEntry in buildConfigurationList)
@@ -499,8 +484,7 @@ public static class SeedsIntegration
                 objCFlagNode = otherLinkerFlagsNode.AppendChildElement("string", "-ObjC");
         }
 
-                //TODO: Find and modify project plist file
-                //TODO: Add CoreData and CoreTelephony frameworks
+        //TODO: Find and modify project plist file
 
         // Save pbxproj as XML and fix it
         var xmlWriterSettings = new XmlWriterSettings
@@ -533,5 +517,104 @@ public static class SeedsIntegration
             if (conflictingKeyNode == null)
                 return key;
         }
+    }
+
+    private static void AddFileReferenceToBuildPhase(XmlDocument pbxproj, string buildPhase, string fileRefKey)
+    {
+        var targetNode = pbxproj.SelectSingleNode(
+            "//dict[" +
+            "key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXNativeTarget\" and " +
+            "key[text()=\"name\"]/following-sibling::*[1]/text()=\"Unity-iPhone\"" +
+            "]");
+        var targetBuildPhasesKeyNodes =
+            targetNode.SelectNodes("key[text()=\"buildPhases\"]/following-sibling::*[1]/string/text()");
+        var buildPhaseNodes =
+            pbxproj.SelectNodes(string.Format("//dict[key[text()=\"isa\"]/following-sibling::*[1]/text()=\"{0}\"]", buildPhase));
+
+        XmlNode resourcesBuildPhaseNode = null;
+        foreach (XmlNode buildPhaseNode in buildPhaseNodes)
+        {
+            var key = buildPhaseNode.PreviousSibling.FirstChild.Value;
+            foreach (XmlNode targetBuildPhasesKeyNode in targetBuildPhasesKeyNodes)
+            {
+                if (targetBuildPhasesKeyNode.Value == key)
+                {
+                    resourcesBuildPhaseNode = buildPhaseNode;
+                    break;
+                }
+            }
+
+            if (resourcesBuildPhaseNode != null)
+                break;
+        }
+        var fileRefs = resourcesBuildPhaseNode
+            .SelectSingleNode("key[text()=\"files\"]/following-sibling::*[1]");
+        if (fileRefs.SelectSingleNode(string.Format("string[text()=\"{0}\"]", fileRefKey)) == null)
+            fileRefs.AppendChildElement("string", fileRefKey);
+    }
+
+    private static void AddSystemFramework(XmlDocument pbxproj, string frameworkName)
+    {
+        var fullFrameworkPath = string.Format("System/Library/Frameworks/{0}.framework", frameworkName);
+
+        var objectsNode = pbxproj.SelectSingleNode("/plist/dict/key[text()=\"objects\"]/following-sibling::*[1]");
+
+        string frameworkFileRefKey;
+        var frameworkFileRefNode = objectsNode.SelectSingleNode(string.Format(
+            "dict[" +
+            "key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXFileReference\" and " +
+            "key[text()=\"path\"]/following-sibling::*[1]/text()=\"{0}\"" +
+            "]", fullFrameworkPath));
+        if (frameworkFileRefNode != null)
+        {
+            frameworkFileRefKey = frameworkFileRefNode.PreviousSibling.FirstChild.Value;
+        }
+        else
+        {
+            frameworkFileRefKey = GeneratePbxprojKey(pbxproj);
+            objectsNode.AppendChildElement("key", frameworkFileRefKey);
+            frameworkFileRefNode = objectsNode.AppendChildElement("dict");
+            frameworkFileRefNode.AppendChildElement("key", "isa");
+            frameworkFileRefNode.AppendChildElement("string", "PBXFileReference");
+            frameworkFileRefNode.AppendChildElement("key", "lastKnownFileType");
+            frameworkFileRefNode.AppendChildElement("string", "wrapper.framework");
+            frameworkFileRefNode.AppendChildElement("key", "name");
+            frameworkFileRefNode.AppendChildElement("string", string.Format("{0}.framework", frameworkName));
+            frameworkFileRefNode.AppendChildElement("key", "path");
+            frameworkFileRefNode.AppendChildElement("string", fullFrameworkPath);
+            frameworkFileRefNode.AppendChildElement("key", "sourceTree");
+            frameworkFileRefNode.AppendChildElement("string", "SDKROOT");
+        }
+
+        string frameworkBuildFileKey;
+        var frameworkBuildFileNode = objectsNode.SelectSingleNode(string.Format(
+            "dict[" +
+            "key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXBuildFile\" and " +
+            "key[text()=\"fileRef\"]/following-sibling::*[1]/text()=\"{0}\"" +
+            "]", frameworkFileRefKey));
+        if (frameworkBuildFileNode != null)
+        {
+            frameworkBuildFileKey = frameworkBuildFileNode.PreviousSibling.FirstChild.Value;
+        }
+        else
+        {
+            frameworkBuildFileKey = GeneratePbxprojKey(pbxproj);
+            objectsNode.AppendChildElement("key", frameworkBuildFileKey);
+            frameworkBuildFileNode = objectsNode.AppendChildElement("dict");
+            frameworkBuildFileNode.AppendChildElement("key", "fileRef");
+            frameworkBuildFileNode.AppendChildElement("string", frameworkFileRefKey);
+            frameworkBuildFileNode.AppendChildElement("key", "isa");
+            frameworkBuildFileNode.AppendChildElement("string", "PBXBuildFile");
+        }
+
+        var frameworksGroupChildrenNode = pbxproj.SelectSingleNode(
+            "//dict[" +
+            "key[text()=\"isa\"]/following-sibling::*[1]/text()=\"PBXGroup\" and " +
+            "key[text()=\"name\"]/following-sibling::*[1]/text()=\"Frameworks\"" +
+            "]/key[text()=\"children\"]/following-sibling::*[1]");
+        if (frameworksGroupChildrenNode.SelectSingleNode(string.Format("string[text()=\"{0}\"]", frameworkFileRefKey)) == null)
+            frameworksGroupChildrenNode.AppendChildElement("string", frameworkFileRefKey);
+
+        AddFileReferenceToBuildPhase(pbxproj, "PBXFrameworksBuildPhase", frameworkBuildFileKey);
     }
 }
