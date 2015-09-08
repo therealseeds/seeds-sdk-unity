@@ -482,9 +482,44 @@ public static class SeedsIntegration
             var objCFlagNode = otherLinkerFlagsNode.SelectSingleNode("string[text()=\"-ObjC\"]");
             if (objCFlagNode == null)
                 objCFlagNode = otherLinkerFlagsNode.AppendChildElement("string", "-ObjC");
-        }
 
-        //TODO: Find and modify project plist file
+            // Tweak Info.plist file to support deep-linking
+            var infoPlistFilename =
+                buildSettings.SelectSingleNode("key[text()=\"INFOPLIST_FILE\"]/following-sibling::*[1]/text()").Value;
+            var infoPlistPath = Path.Combine(pathToBuiltProject, infoPlistFilename);
+            var infoPlist = new XmlDocument();
+            infoPlist.Load(infoPlistPath);
+
+            var infoPlistContent = infoPlist.SelectSingleNode("plist/dict");
+            var urlTypesNode = infoPlistContent.SelectSingleNode("key[text()=\"CFBundleURLTypes\"]/following-sibling::*[1]");
+            if (urlTypesNode == null)
+            {
+                infoPlistContent.AppendChildElement("key", "CFBundleURLTypes");
+                urlTypesNode = infoPlistContent.AppendChildElement("array");
+            }
+
+            var urlSchemeEntryNode = urlTypesNode.SelectSingleNode("dict[string=\"com.playseeds.unity3d.${PRODUCT_NAME}\"]");
+            if (urlSchemeEntryNode == null)
+            {
+                urlSchemeEntryNode = urlTypesNode.AppendChildElement("dict");
+
+                urlSchemeEntryNode.AppendChildElement("key", "CFBundleURLName");
+                urlSchemeEntryNode.AppendChildElement("string", "com.playseeds.unity3d.${PRODUCT_NAME}");
+            }
+
+            var urlSchemeNode =
+                urlSchemeEntryNode.SelectSingleNode("key[text()=\"CFBundleURLSchemes\"]//following-sibling::*[1]");
+            if (urlSchemeNode == null)
+            {
+                urlSchemeEntryNode.AppendChildElement("key", "CFBundleURLSchemes");
+                urlSchemeNode = urlSchemeEntryNode.AppendChildElement("array");
+            }
+
+            urlSchemeNode.RemoveAll();
+            urlSchemeNode.AppendChildElement("string", scheme);
+
+            infoPlist.Save(infoPlistPath);
+        }
 
         // Save pbxproj as XML and fix it
         var xmlWriterSettings = new XmlWriterSettings
