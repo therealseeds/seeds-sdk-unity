@@ -73,8 +73,13 @@ public static class SeedsBuild
         var originalAssetsPath = Path.Combine(projectPath, "Assets_Original");
         var originalPluginsPath = Path.Combine(originalAssetsPath, "Plugins");
         var originalAndroidPluginsPath = Path.Combine(originalPluginsPath, "Android");
+        #if UNITY_5_0 || UNITY_5_1
         var playerAndroidManifestPath =
             Path.Combine(EditorApplication.applicationContentsPath, "PlaybackEngines/AndroidPlayer/AndroidManifest.xml");
+        #else
+        var playerAndroidManifestPath =
+            Path.Combine(EditorApplication.applicationContentsPath, "PlaybackEngines/AndroidPlayer/Apk/AndroidManifest.xml");
+        #endif
         var seedsAndroidManifestPath =
             Path.Combine(androidPluginsPath, "AndroidManifest.xml");
 
