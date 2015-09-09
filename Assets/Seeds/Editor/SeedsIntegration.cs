@@ -405,7 +405,7 @@ public static class SeedsIntegration
         foreach (var seedsResourcePath in seedsResources)
         {
             var srcPath = Path.Combine(projectPath, seedsResourcePath);
-            var dstPath = Path.Combine(projectPath, seedsResourcePath.Replace(seedsResourcesPathInAssets, ""));
+            var dstPath = Path.Combine(seedsResourcesPath, seedsResourcePath.Replace(seedsResourcesPathInAssets, ""));
             var attributes = File.GetAttributes(srcPath);
 
             if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
