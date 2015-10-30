@@ -40,6 +40,8 @@
 
 - (void)start:(NSString *)appKey withHost:(NSString *)appHost andDeviceId:(NSString *)deviceId;
 
+- (NSString *)getAppKey;
+
 - (BOOL)isStarted;
 
 - (void)recordEvent:(NSString *)key count:(int)count;
