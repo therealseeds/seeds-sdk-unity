@@ -37,7 +37,6 @@ public class DeepLinkActivity extends Activity {
         Intent intent = getIntent();
         Uri data = intent.getData();
         UnityPlayer.UnitySendMessage(gameObjectName, "onLinkArrived", data.toString());
-
         // Finish this activity
         finish();
     }
