@@ -11,14 +11,14 @@ using UnityEngine;
 
 public static class SeedsIntegration
 {
-    [MenuItem("Seeds SDK/Configure")]
+    [MenuItem("Edit/Seeds SDK/Configure Deep Link")]
     public static void ShowConfigureDialog()
     {
         var dialogWindow = EditorWindow.GetWindow<SeedsIntegrationDialogWindow>(true, "Seeds SDK", true);
 
-        var scheme = "your unique game name";
+        var scheme = "your-game-name";
         var host = "seeds";
-        var pathPrefix = "item name";
+        var pathPrefix = "item-name";
         var displayPathPrefix = pathPrefix;
 
         if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)

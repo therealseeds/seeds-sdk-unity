@@ -23,7 +23,7 @@ public class Seeds : MonoBehaviour
     /// <summary>
     /// Server URL. Do not include trailing slash.
     /// </summary>
-    private string ServerURL = "http://dash.playseeds.com";
+    private string ServerURL = "https://dash.playseeds.com";
 
     /// <summary>
     /// Application API key.

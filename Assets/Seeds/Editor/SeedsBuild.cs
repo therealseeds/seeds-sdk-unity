@@ -9,7 +9,7 @@ using UnityEngine;
 
 public static class SeedsBuild
 {
-    [MenuItem("Seeds SDK/Build package")]
+    [MenuItem("Edit/Seeds SDK/Build package")]
     public static void BuildPackage()
     {
         var projectPath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
@@ -63,7 +63,7 @@ public static class SeedsBuild
         }
     }
 
-    [MenuItem("Seeds SDK/Build package (legacy)")]
+    [MenuItem("Edit/Seeds SDK/Build package (legacy)")]
     public static void BuildLegacyPackage()
     {
         var projectPath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
