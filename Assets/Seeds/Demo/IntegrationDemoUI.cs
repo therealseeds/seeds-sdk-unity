@@ -6,6 +6,9 @@ public class IntegrationDemoUI : MonoBehaviour
 {
     void Start()
     {
+        var instanceIdGameObject = GameObject.Find("Instance ID");
+        instanceIdGameObject.GetComponent<Text>().text = string.Format("Instance ID {0}", Random.Range(0, 1000));
+
         var lastUrlReceivedGameObject = GameObject.Find("Last URL received");
         SeedsDeepLinks.Instance.OnLinkArrived += (string url) => {
             Debug.Log("Demo received URL + " + url);
