@@ -518,6 +518,16 @@ public static class SeedsIntegration
             urlSchemeNode.RemoveAll();
             urlSchemeNode.AppendChildElement("string", scheme);
 
+            if (infoPlist.DocumentType != null)
+            {
+                var name = infoPlist.DocumentType.Name;
+                var publicId = infoPlist.DocumentType.PublicId;
+                var systemId = infoPlist.DocumentType.SystemId;
+                var parent = infoPlist.DocumentType.ParentNode;
+                var documentTypeWithNullInternalSubset = infoPlist.CreateDocumentType(name, publicId, systemId, null);
+                parent.ReplaceChild(documentTypeWithNullInternalSubset, infoPlist.DocumentType);
+            }
+
             infoPlist.Save(infoPlistPath);
         }
 
