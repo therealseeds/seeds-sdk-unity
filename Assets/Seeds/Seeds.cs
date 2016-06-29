@@ -30,18 +30,21 @@ public class Seeds : MonoBehaviour
     /// </summary>
     public string ApplicationKey;
 
-    public event Action OnInAppMessageClicked;
-    public event Action OnInAppMessageClosedComplete;
-    public event Action OnInAppMessageClosedIncomplete;
-    public event Action OnInAppMessageLoadSucceeded;
-    public event Action OnInAppMessageShownSuccessfully;
-    public event Action OnInAppMessageShownInsuccessfully;
-    public event Action OnNoInAppMessageFound;
+    public event Action<string> OnInAppMessageClicked;
+    public event Action<string> OnInAppMessageClosedComplete;
+    public event Action<string> OnInAppMessageClosedIncomplete;
+    public event Action<string> OnInAppMessageLoadSucceeded;
+    public event Action<string> OnInAppMessageShownSuccessfully;
+    public event Action<string> OnInAppMessageShownInsuccessfully;
+    public event Action<string> OnNoInAppMessageFound;
+    public event Action OnAndroidIapServiceConnected;
+    public event Action OnAndroidIapServiceDisconnected;
 
-    #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
     private AndroidJavaObject androidInstance;
     private AndroidJavaObject androidBridgeInstance;
-    #endif
+    private AndroidJavaObject inAppBillingServiceConnection;
+#endif
 
     void Awake()
     {
@@ -67,7 +70,7 @@ public class Seeds : MonoBehaviour
 
     void Start()
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         using (var seedsClass = new AndroidJavaClass("com.playseeds.android.sdk.Seeds"))
         {
             androidInstance = seedsClass.CallStatic<AndroidJavaObject>("sharedInstance");
@@ -76,10 +79,15 @@ public class Seeds : MonoBehaviour
         {
             androidBridgeInstance = inAppMessageListenerBridgeClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
         }
-        #elif UNITY_IOS && !UNITY_EDITOR
+        using (var inAppBillingServiceConnectionClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppBillingServiceConnection"))
+        {
+            inAppBillingServiceConnection = inAppBillingServiceConnectionClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+        }
+        inAppBillingServiceConnection.Call("connect");
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_SetGameObjectName(gameObject.name);
         Seeds_Setup(false);
-        #endif
+#endif
 
         if (AutoInitialize)
             Init(ServerURL, ApplicationKey);
@@ -102,7 +110,7 @@ public class Seeds : MonoBehaviour
         #endif
     }
 
-    #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
     private AndroidJavaObject CurrentActivity
     {
         get
@@ -111,6 +119,14 @@ public class Seeds : MonoBehaviour
             {
                 return unityPlayerClass.GetStatic<AndroidJavaObject>("currentActivity");
             }
+        }
+    }
+
+    private AndroidJavaObject AndroidIapService
+    {
+        get
+        {
+            return inAppBillingServiceConnection.Call<AndroidJavaObject>("getInAppBillingService");
         }
     }
 
@@ -150,399 +166,423 @@ public class Seeds : MonoBehaviour
 
         return list;
     }
-    #endif
+#endif
 
     private static void NotImplemented(string method)
     {
         Debug.LogWarning(string.Format("Method {0} not implemented for current platform. Please build for iOS or Android to test.", method));
     }
 
-    void inAppMessageClicked(string notUsed)
+    void inAppMessageClicked(string messageId)
     {
         if (TraceEnabled)
-            Debug.Log("[Seeds] OnInAppMessageClicked");
+            Debug.Log(string.Format("[Seeds] OnInAppMessageClicked({0})", messageId));
 
         if (OnInAppMessageClicked != null)
-            OnInAppMessageClicked();
+            OnInAppMessageClicked(messageId);
     }
 
-    void inAppMessageClosedComplete(string inAppMessageId)
+    void inAppMessageClosedComplete(string messageId)
     {
         if (TraceEnabled)
-            Debug.Log("[Seeds] OnInAppMessageClosedComplete");
+            Debug.Log(string.Format ("[Seeds] OnInAppMessageClosedComplete({0})", messageId));
         
         if (OnInAppMessageClosedComplete != null)
-            OnInAppMessageClosedComplete();
+            OnInAppMessageClosedComplete(messageId);
     }
 
-    void inAppMessageClosedIncomplete(string inAppMessageId)
+    void inAppMessageClosedIncomplete(string messageId)
     {
         if (TraceEnabled)
-            Debug.Log("[Seeds] OnInAppMessageClosedIncomplete");
+            Debug.Log(string.Format("[Seeds] OnInAppMessageClosedIncomplete({0})", messageId));
         
         if (OnInAppMessageClosedIncomplete != null)
-            OnInAppMessageClosedIncomplete();
+            OnInAppMessageClosedIncomplete(messageId);
     }
 
-    void inAppMessageLoadSucceeded(string inAppMessageId)
+    void inAppMessageLoadSucceeded(string messageId)
     {
         if (TraceEnabled)
-            Debug.Log("[Seeds] OnInAppMessageLoadSucceeded");
+            Debug.Log(string.Format("[Seeds] OnInAppMessageLoadSucceeded({0})", messageId));
         
         if (OnInAppMessageLoadSucceeded != null)
-            OnInAppMessageLoadSucceeded();
+            OnInAppMessageLoadSucceeded(messageId);
     }
 
-    void inAppMessageShownSuccessfully(string inAppMessageId)
+    void inAppMessageShownSuccessfully(string messageId)
     {
         if (TraceEnabled)
-            Debug.Log("[Seeds] OnInAppMessageShownSuccessfully");
+            Debug.Log(string.Format("[Seeds] OnInAppMessageShownSuccessfully({0})", messageId));
         
         if (OnInAppMessageShownSuccessfully != null)
-            OnInAppMessageShownSuccessfully();
+            OnInAppMessageShownSuccessfully(messageId);
     }
 
-    void inAppMessageShownInsuccessfully(string inAppMessageId)
+    void inAppMessageShownInsuccessfully(string messageId)
     {
         if (TraceEnabled)
-            Debug.Log("[Seeds] OnInAppMessageShownInsuccessfully");
+            Debug.Log(string.Format("[Seeds] OnInAppMessageShownInsuccessfully({0})", messageId));
         
         if (OnInAppMessageShownInsuccessfully != null)
-            OnInAppMessageShownInsuccessfully();
+            OnInAppMessageShownInsuccessfully(messageId);
     }
 
-    void noInAppMessageFound(string notUsed)
+    void noInAppMessageFound(string messageId)
     {
         if (TraceEnabled)
-            Debug.Log("[Seeds] OnNoInAppMessageFound");
+            Debug.Log(string.Format("[Seeds] OnNoInAppMessageFound({0})", messageId));
         
         if (OnNoInAppMessageFound != null)
-            OnNoInAppMessageFound();
+            OnNoInAppMessageFound(messageId);
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
+    void onAndroidIapServiceConnected(string notUsed)
+    {
+        if (TraceEnabled)
+            Debug.Log("[Seeds] onAndroidIapServiceConnected()");
+
+        if (OnAndroidIapServiceConnected != null)
+            OnAndroidIapServiceConnected();
+    }
+
+    void onAndroidIapServiceDisconnected(string notUsed)
+    {
+        if (TraceEnabled)
+            Debug.Log("[Seeds] onAndroidIapServiceDisconnected()");
+
+        if (OnAndroidIapServiceDisconnected != null)
+            OnAndroidIapServiceDisconnected();
+    }
+#endif
+
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_Init(string serverUrl, string appKey);
-    #endif
+#endif
 
     public Seeds Init(string serverUrl, string appKey)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
-        RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", CurrentActivity, androidBridgeInstance, serverUrl,
+#if UNITY_ANDROID && !UNITY_EDITOR
+        RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", CurrentActivity, AndroidIapService, androidBridgeInstance, serverUrl,
             appKey));
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_Init(serverUrl, appKey);
-        #else
+#else
         NotImplemented("Init(string serverUrl, string appKey)");
-        #endif
+#endif
 
         return this;
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_InitWithDeviceId(string serverUrl, string appKey, string deviceId);
-    #endif
+#endif
 
     public Seeds Init(string serverUrl, string appKey, string deviceId)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
-        RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", CurrentActivity, androidBridgeInstance, serverUrl,
+#if UNITY_ANDROID && !UNITY_EDITOR
+        RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", CurrentActivity, AndroidIapService, androidBridgeInstance, serverUrl,
             appKey, deviceId));
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_InitWithDeviceId(serverUrl, appKey, deviceId);
-        #else
+#else
         NotImplemented("Init(string serverUrl, string appKey, string deviceId)");
-        #endif
+#endif
 
         return this;
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern bool Seeds_IsStarted();
-    #endif
+#endif
 
     public bool IsInitialized
     {
         get
         {
-            #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
             return androidInstance.Call<bool>("isInitialized");
-            #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
             return Seeds_IsStarted();
-            #else
+#else
             NotImplemented("IsInitialized::get");
             return false;
-            #endif
+#endif
         }
     }
 
     public void Halt()
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("halt");
-        #else
+#else
         NotImplemented("Halt()");
-        #endif
+#endif
     }
 
-    #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
     public void NotifyOnStart()
     {
-        RunOnUIThread(() => androidInstance.Call("onStart"));
+        RunOnUIThread(() => {
+            androidInstance.Call("onStart");
+        });
     }
 
     public void NotifyOnStop()
     {
-        RunOnUIThread(() => androidInstance.Call("onStop"));
+        RunOnUIThread(() => {
+            androidInstance.Call("onStop");
+        });
     }
 
     public void NotifyOnGCMRegistrationId(string registrationId)
     {
         androidInstance.Call("onRegistrationId", registrationId);
     }
-    #endif
+#endif
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_RecordEvent1(string key);
-    #endif
+#endif
 
     public void RecordEvent(string key)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordEvent", key);
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_RecordEvent1(key);
-        #else
+#else
         NotImplemented("RecordEvent(string key)");
-        #endif
+#endif
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_RecordEvent2(string key, int count);
-    #endif
+#endif
 
     public void RecordEvent(string key, int count)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordEvent", key, count);
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_RecordEvent2(key, count);
-        #else
+#else
         NotImplemented("RecordEvent(string key, int count)");
-        #endif
+#endif
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_RecordEvent3(string key, int count, double sum);
-    #endif
+#endif
 
     public void RecordEvent(string key, int count, double sum)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordEvent", key, count, sum);
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_RecordEvent3(key, count, sum);
-        #else
+#else
         NotImplemented("RecordEvent(string key, int count, double sum)");
-        #endif
+#endif
     }
 
     public void RecordEvent(string key, IDictionary<string, string> segmentation, int count)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordEvent", key, CreateMapFromDicrionary(segmentation), count);
-        #else
+#else
         NotImplemented("RecordEvent(string key, IDictionary<string, string> segmentation, int count)");
-        #endif
+#endif
     }
 
     public void RecordEvent(string key, IDictionary<string, string> segmentation, int count, double sum)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordEvent", key, CreateMapFromDicrionary(segmentation), count, sum);
-        #else
+#else
         NotImplemented("RecordEvent(string key, IDictionary<string, string> segmentation, int count, double sum)");
-        #endif
+#endif
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_RecordIAPEvent(string key, double price);
-    #endif
+#endif
 
     public void RecordIAPEvent(string key, double price)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordIAPEvent", key, price);
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_RecordIAPEvent(key, price);
-        #else
+#else
         NotImplemented("RecordIAPEvent(string key, double price)");
-        #endif
+#endif
     }
 
 // new 
 
-	#if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
 	[DllImport ("__Internal")]
 	private static extern void Seeds_TrackPurchase(string key, double price);
-	#endif
+#endif
 	
 	public void TrackPurchase(string key, double price)
 	{
-		#if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
 		androidInstance.Call("trackPurchase", key, price);
-		#elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
 		Seeds_TrackPurchase(key, price);
-		#else
+#else
 		NotImplemented("TrackPurchase(string key, double price)");
-		#endif
+#endif
 	}
 
 //
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_RecordSeedsIAPEvent(string key, double price);
-    #endif
+#endif
 
     public void RecordSeedsIAPEvent(string key, double price)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("recordSeedsIAPEvent", key, price);
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_RecordSeedsIAPEvent(key, price);
-        #else
+#else
         NotImplemented("RecordSeedsIAPEvent(string key, double price)");
-        #endif
+#endif
     }
 
     public Seeds SetUserData(IDictionary<string, string> data)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("setUserData", CreateMapFromDicrionary(data));
-        #else
+#else
         NotImplemented("SetUserData(IDictionary<string, string> data)");
-        #endif
+#endif
 
         return this;
     }
 
     public Seeds SetUserData(IDictionary<string, string> data, IDictionary<string, string> customData)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("setUserData", CreateMapFromDicrionary(data),
             CreateMapFromDicrionary(customData));
-        #else
+#else
         NotImplemented("SetUserData(IDictionary<string, string> data, IDictionary<string, string> customData)");
-        #endif
+#endif
 
         return this;
     }
 
     public Seeds SetCustomUserData(IDictionary<string, string> customData)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("setCustomUserData", CreateMapFromDicrionary(customData));
-        #else
+#else
         NotImplemented("SetCustomUserData(IDictionary<string, string> customData)");
-        #endif
+#endif
 
         return this;
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_SetLocation(double lat, double lon);
-    #endif
+#endif
 
     public Seeds SetLocation(double lat, double lon)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("setLocation", lat, lon);
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_SetLocation(lat, lon);
-        #else
+#else
         NotImplemented("SetLocation(double lat, double lon)");
-        #endif
+#endif
 
         return this;
     }
 
     public Seeds SetCustomCrashSegments(IDictionary<string, string> segments)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("setCustomCrashSegments", CreateMapFromDicrionary(segments));
-        #else
+#else
         NotImplemented("SetCustomCrashSegments(IDictionary<string, string> segments)");
-        #endif
+#endif
 
         return this;
     }
 
     public Seeds AddCrashLog(string record)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("addCrashLog", record);
-        #else
+#else
         NotImplemented("AddCrashLog(string record)");
-        #endif
+#endif
 
         return this;
     }
 
     public Seeds LogException(string exception)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("logException", exception);
-        #else
+#else
         NotImplemented("LogException(string exception)");
-        #endif
+#endif
 
         return this;
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_EnableCrashReporting();
-    #endif
+#endif
 
     public Seeds EnableCrashReporting()
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("enableCrashReporting");
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_EnableCrashReporting();
-        #else
+#else
         NotImplemented("EnableCrashReporting()");
-        #endif
+#endif
 
         return this;
     }
 
     public Seeds SetDisableUpdateSessionRequests(bool disable)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("setDisableUpdateSessionRequests", disable);
-        #else
+#else
         NotImplemented("SetDisableUpdateSessionRequests(bool disable)");
-        #endif
+#endif
 
         return this;
     }
 
     public Seeds SetLoggingEnabled(bool enabled)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("setLoggingEnabled", enabled);
-        #else
+#else
         NotImplemented("SetLoggingEnabled(bool enabled)");
-        #endif
+#endif
 
         return this;
     }
@@ -551,12 +591,12 @@ public class Seeds : MonoBehaviour
     {
         get
         {
-            #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
             return androidInstance.Call<bool>("isLoggingEnabled");
-            #else
+#else
             NotImplemented("IsLoggingEnabled::get");
             return false;
-            #endif
+#endif
         }
         set
         {
@@ -566,11 +606,11 @@ public class Seeds : MonoBehaviour
 
     public Seeds EnablePublicKeyPinning(IEnumerable<string> certificates)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call<AndroidJavaObject>("enablePublicKeyPinning", CreateListFromEnumerable(certificates));
-        #else
+#else
         NotImplemented("EnablePublicKeyPinning(IEnumerable<string> certificates)");
-        #endif
+#endif
 
         return this;
     }
@@ -615,37 +655,37 @@ public class Seeds : MonoBehaviour
 //        #endif
 //    }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_SetMessageVariantName(string messageVariantName);
-    #endif
+#endif
 
     public void SetMessageVariantName(string messageVariantName)
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("setMessageVariantName", messageVariantName);
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_SetMessageVariantName(messageVariantName);
-        #else
+#else
         NotImplemented("SetMessageVariantName(string messageVariantName)");
-        #endif
+#endif
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern string Seeds_GetMessageVariantName();
-    #endif
+#endif
 
     public string GetMessageVariantName()
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         return androidInstance.Call<string>("getMessageVariantName");
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         return Seeds_GetMessageVariantName();
-        #else
+#else
         NotImplemented("GetMessageVariantName()");
         return null;
-        #endif
+#endif
     }
 
     public string MessageVariantName
@@ -660,55 +700,55 @@ public class Seeds : MonoBehaviour
         }
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_RequestInAppMessage();
-    #endif
+#endif
 
     public void RequestInAppMessage()
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("requestInAppMessage");
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_RequestInAppMessage();
-        #else
+#else
         NotImplemented("RequestInAppMessage()");
-        #endif
+#endif
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern bool Seeds_IsInAppMessageLoaded();
-    #endif
+#endif
 
     public bool IsInAppMessageLoaded
     {
         get
         {
-            #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
             return androidInstance.Call<bool>("isInAppMessageLoaded");
-            #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
             return Seeds_IsInAppMessageLoaded();
-            #else
+#else
             NotImplemented("IsInAppMessageLoaded::get");
             return false;
-            #endif
+#endif
         }
     }
 
-    #if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
     private static extern void Seeds_ShowInAppMessage();
-    #endif
+#endif
 
     public void ShowInAppMessage()
     {
-        #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
         androidInstance.Call("showInAppMessage");
-        #elif UNITY_IOS && !UNITY_EDITOR
+#elif UNITY_IOS && !UNITY_EDITOR
         Seeds_ShowInAppMessage();
-        #else
+#else
         NotImplemented("ShowInAppMessage()");
-        #endif
+#endif
     }
 }

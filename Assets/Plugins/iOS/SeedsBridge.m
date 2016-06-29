@@ -83,33 +83,33 @@
     return self;
 }
 
-- (void)seedsInAppMessageClicked:(SeedsInAppMessage*)inAppMessage
+- (void)seedsInAppMessageClicked:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId
 {
-    UnitySendMessage([self.gameObjectName UTF8String], "inAppMessageClicked", "");
+    UnitySendMessage([self.gameObjectName UTF8String], "inAppMessageClicked", [messageId UTF8String]);
 }
 
-- (void)seedsInAppMessageClosed:(SeedsInAppMessage*)inAppMessage andCompleted:(BOOL)completed
+- (void)seedsInAppMessageClosed:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId andCompleted:(BOOL)completed
 {
     UnitySendMessage([self.gameObjectName UTF8String],
                      completed ? "inAppMessageClosedComplete" : "inAppMessageClosedIncomplete",
-                     "");
+                     [messageId UTF8String]);
 }
 
-- (void)seedsInAppMessageLoadSucceeded:(SeedsInAppMessage*)inAppMessage
+- (void)seedsInAppMessageLoadSucceeded:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId
 {
-    UnitySendMessage([self.gameObjectName UTF8String], "inAppMessageLoadSucceeded", "");
+    UnitySendMessage([self.gameObjectName UTF8String], "inAppMessageLoadSucceeded", [messageId UTF8String]);
 }
 
-- (void)seedsInAppMessageShown:(SeedsInAppMessage*)inAppMessage withSuccess:(BOOL)success
+- (void)seedsInAppMessageShown:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId withSuccess:(BOOL)success
 {
     UnitySendMessage([self.gameObjectName UTF8String],
                      success ? "inAppMessageShownSuccessfully" : "inAppMessageShownInsuccessfully",
-                     "");
+                     [messageId UTF8String]);
 }
 
-- (void)seedsNoInAppMessageFound
+- (void)seedsNoInAppMessageFound:(NSString*)messageId
 {
-    UnitySendMessage([self.gameObjectName UTF8String], "noInAppMessageFound", "");
+    UnitySendMessage([self.gameObjectName UTF8String], "noInAppMessageFound", [messageId UTF8String]);
 }
 
 @end

@@ -11,40 +11,36 @@ public class InAppMessageListenerBridge implements InAppMessageListener {
         this.unityObjectName = unityObjectName;
     }
 
-    public void inAppMessageClicked() {
-        UnityPlayer.UnitySendMessage(unityObjectName, "inAppMessageClicked", "");
+    public void inAppMessageClicked(String messageId, InAppMessage inAppMessage) {
+        UnityPlayer.UnitySendMessage(unityObjectName, "inAppMessageClicked", messageId);
     }
 
-    public void inAppMessageClosed(InAppMessage inAppMessage, boolean completed) {
-        String inAppMessageId = inAppMessage == null ? null : inAppMessage.toString();
+    public void inAppMessageClosed(String messageId, InAppMessage inAppMessage, boolean completed) {
         if (completed) {
             UnityPlayer.UnitySendMessage(unityObjectName, "inAppMessageClosedComplete",
-                    inAppMessageId);
+                    messageId);
         } else {
             UnityPlayer.UnitySendMessage(unityObjectName, "inAppMessageClosedIncomplete",
-                    inAppMessageId);
+                    messageId);
         }
     }
 
-    public void inAppMessageLoadSucceeded(InAppMessage inAppMessage) {
-        String inAppMessageId = inAppMessage == null ? null : inAppMessage.toString();
-        UnityPlayer.UnitySendMessage(unityObjectName, "inAppMessageLoadSucceeded",
-                inAppMessage.toString());
+    public void inAppMessageLoadSucceeded(String messageId, InAppMessage inAppMessage) {
+        UnityPlayer.UnitySendMessage(unityObjectName, "inAppMessageLoadSucceeded", messageId);
     }
 
-    public void inAppMessageShown(InAppMessage inAppMessage, boolean succeeded) {
-        String inAppMessageId = inAppMessage == null ? null : inAppMessage.toString();
+    public void inAppMessageShown(String messageId, InAppMessage inAppMessage, boolean succeeded) {
         if (succeeded) {
             UnityPlayer.UnitySendMessage(unityObjectName, "inAppMessageShownSuccessfully",
-                    inAppMessageId);
+                    messageId);
         } else {
             UnityPlayer.UnitySendMessage(unityObjectName, "inAppMessageShownInsuccessfully",
-                    inAppMessageId);
+                    messageId);
         }
     }
 
-    public void noInAppMessageFound() {
-        UnityPlayer.UnitySendMessage(unityObjectName, "noInAppMessageFound", "");
+    public void noInAppMessageFound(String messageId) {
+        UnityPlayer.UnitySendMessage(unityObjectName, "noInAppMessageFound", messageId);
     }
 
     public static InAppMessageListenerBridge create(String unityObjectName) {
