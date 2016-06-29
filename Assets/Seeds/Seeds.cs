@@ -23,7 +23,7 @@ public class Seeds : MonoBehaviour
     /// <summary>
     /// Server URL. Do not include trailing slash.
     /// </summary>
-    private string ServerURL = "https://dash.playseeds.com";
+    public string ServerURL = "https://dash.playseeds.com";
 
     /// <summary>
     /// Application API key.
@@ -242,6 +242,9 @@ public class Seeds : MonoBehaviour
         if (TraceEnabled)
             Debug.Log("[Seeds] onAndroidIapServiceConnected()");
 
+        if (AutoInitialize)
+            Init(ServerURL, ApplicationKey);
+
         if (OnAndroidIapServiceConnected != null)
             OnAndroidIapServiceConnected();
     }
@@ -250,6 +253,9 @@ public class Seeds : MonoBehaviour
     {
         if (TraceEnabled)
             Debug.Log("[Seeds] onAndroidIapServiceDisconnected()");
+
+        if (AutoInitialize)
+            Init(ServerURL, ApplicationKey);
 
         if (OnAndroidIapServiceDisconnected != null)
             OnAndroidIapServiceDisconnected();
@@ -702,53 +708,65 @@ public class Seeds : MonoBehaviour
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
-    private static extern void Seeds_RequestInAppMessage();
+    private static extern void Seeds_RequestInAppMessage(string messageId);
 #endif
+
+    public void RequestInAppMessage(string messageId)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call("requestInAppMessage", messageId);
+#elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RequestInAppMessage(messageId);
+#else
+        NotImplemented("RequestInAppMessage(string messageId)");
+#endif
+    }
 
     public void RequestInAppMessage()
     {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("requestInAppMessage");
-#elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_RequestInAppMessage();
-#else
-        NotImplemented("RequestInAppMessage()");
-#endif
+        RequestInAppMessage(null);
     }
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
-    private static extern bool Seeds_IsInAppMessageLoaded();
+    private static extern bool Seeds_IsInAppMessageLoaded(string messageId);
 #endif
 
-    public bool IsInAppMessageLoaded
+    public bool IsInAppMessageLoaded(string messageId)
     {
-        get
-        {
 #if UNITY_ANDROID && !UNITY_EDITOR
-            return androidInstance.Call<bool>("isInAppMessageLoaded");
+        return androidInstance.Call<bool>("isInAppMessageLoaded", messageId);
 #elif UNITY_IOS && !UNITY_EDITOR
-            return Seeds_IsInAppMessageLoaded();
+        return Seeds_IsInAppMessageLoaded(messageId);
 #else
-            NotImplemented("IsInAppMessageLoaded::get");
-            return false;
+        NotImplemented("IsInAppMessageLoaded(string messageId)");
+        return false;
 #endif
-        }
+    }
+
+    public bool IsInAppMessageLoaded()
+    {
+        return IsInAppMessageLoaded(null);
     }
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
-    private static extern void Seeds_ShowInAppMessage();
+    private static extern void Seeds_ShowInAppMessage(string messageId);
 #endif
+
+    public void ShowInAppMessage(string messageId)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call("showInAppMessage", messageId);
+#elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_ShowInAppMessage(messageId);
+#else
+        NotImplemented("ShowInAppMessage(string messageId)");
+#endif
+    }
 
     public void ShowInAppMessage()
     {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("showInAppMessage");
-#elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_ShowInAppMessage();
-#else
-        NotImplemented("ShowInAppMessage()");
-#endif
+        ShowInAppMessage(null);
     }
 }

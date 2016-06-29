@@ -225,17 +225,20 @@ const char* Seeds_GetMessageVariantName()
     return strdup(pcsMessageVariantName);
 }
 
-void Seeds_RequestInAppMessage()
+void Seeds_RequestInAppMessage(const char* pcsMessageId)
 {
-    [Seeds.sharedInstance requestInAppMessage];
+    NSString* messageId = [NSString stringWithUTF8String:csMessageId];
+    [Seeds.sharedInstance requestInAppMessage:messageId];
 }
 
-BOOL Seeds_IsInAppMessageLoaded()
+BOOL Seeds_IsInAppMessageLoaded(const char* pcsMessageId)
 {
-    return [Seeds.sharedInstance isInAppMessageLoaded];
+    NSString* messageId = [NSString stringWithUTF8String:pcsMessageId];
+    return [Seeds.sharedInstance isInAppMessageLoaded:messageId];
 }
 
-void Seeds_ShowInAppMessage()
+void Seeds_ShowInAppMessage(const char* pcsMessageId)
 {
-    [Seeds.sharedInstance showInAppMessageIn:UnityGetGLViewController()];
+    NSString* messageId = [NSString stringWithUTF8String:csMessageId];
+    [Seeds.sharedInstance showInAppMessage:messageId in:UnityGetGLViewController()];
 }

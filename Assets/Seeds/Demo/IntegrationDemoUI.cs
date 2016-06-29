@@ -29,9 +29,17 @@ public class IntegrationDemoUI : MonoBehaviour
 
     public void InAppMessage1()
     {
-        if (Seeds.Instance.IsInAppMessageLoaded)
-            Seeds.Instance.ShowInAppMessage();
+        if (Seeds.Instance.IsInAppMessageLoaded("575f872a64bc1e5b0eca506f"))
+            Seeds.Instance.ShowInAppMessage("575f872a64bc1e5b0eca506f");
         else
-            Seeds.Instance.RequestInAppMessage();
+            Seeds.Instance.RequestInAppMessage("575f872a64bc1e5b0eca506f");
+    }
+
+    public void InAppMessage2()
+    {
+        if (Seeds.Instance.IsInAppMessageLoaded("5746851bb29ee753053a7c9a"))
+            Seeds.Instance.ShowInAppMessage("5746851bb29ee753053a7c9a");
+        else
+            Seeds.Instance.RequestInAppMessage("5746851bb29ee753053a7c9a");
     }
 }

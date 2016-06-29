@@ -30,6 +30,7 @@
 @property (readonly, nonatomic, copy) NSString* deviceId;
 @property (atomic, retain) id<SeedsInAppMessageDelegate> inAppMessageDelegate;
 
+@property (atomic, copy) NSString* inAppMessageId;
 @property (atomic, assign) BOOL inAppMessageDoNotShow;
 @property (atomic, assign) BOOL adClicked;
 @property (atomic, copy) NSString* inAppMessageVariantName;
@@ -71,10 +72,13 @@ extern NSString* const kCLYUserCustom;
 - (void)trackPurchase:(NSString *)key price:(double)price;
 
 - (void)requestInAppMessage;
+- (void)requestInAppMessage:(NSString*)messageId;
 
 - (BOOL)isInAppMessageLoaded;
+- (BOOL)isInAppMessageLoaded:(NSString*)messageId;
 
 - (void)showInAppMessageIn:(UIViewController*)viewController;
+- (void)showInAppMessage:(NSString*)messageId in:(UIViewController*)viewController;
 
 #pragma mark - Seeds Messaging
 #if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR) && (!SEEDS_TARGET_WATCHKIT)

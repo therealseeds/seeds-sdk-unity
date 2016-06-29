@@ -15,11 +15,11 @@
 
 @optional
 
-- (void)seedsInAppMessageClicked:(SeedsInAppMessage*)inAppMessage;
-- (void)seedsInAppMessageClosed:(SeedsInAppMessage*)inAppMessage andCompleted:(BOOL)completed;
-- (void)seedsInAppMessageLoadSucceeded:(SeedsInAppMessage*)inAppMessage;
-- (void)seedsInAppMessageShown:(SeedsInAppMessage*)inAppMessage withSuccess:(BOOL)success;
-- (void)seedsNoInAppMessageFound;
+- (void)seedsInAppMessageClicked:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId;
+- (void)seedsInAppMessageClosed:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId andCompleted:(BOOL)completed;
+- (void)seedsInAppMessageLoadSucceeded:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId;
+- (void)seedsInAppMessageShown:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId withSuccess:(BOOL)success;
+- (void)seedsNoInAppMessageFound:(NSString*)messageId;
 
 @end
 
