@@ -30,6 +30,10 @@ public class InAppBillingServiceConnection implements ServiceConnection {
         }
     }
 
+    public boolean hasInAppBillingService() {
+        return inAppBillingService != null;
+    }
+
     public IInAppBillingService getInAppBillingService() {
         return inAppBillingService;
     }

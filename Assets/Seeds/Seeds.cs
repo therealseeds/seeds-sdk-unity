@@ -126,6 +126,8 @@ public class Seeds : MonoBehaviour
     {
         get
         {
+            if (!inAppBillingServiceConnection.Call<bool>("hasInAppBillingService"))
+                return null;
             return inAppBillingServiceConnection.Call<AndroidJavaObject>("getInAppBillingService");
         }
     }
@@ -270,7 +272,13 @@ public class Seeds : MonoBehaviour
     public Seeds Init(string serverUrl, string appKey)
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", CurrentActivity, AndroidIapService, androidBridgeInstance, serverUrl,
+        var currentActivity = CurrentActivity;
+        if (currentActivity == null)
+            Debug.LogWarning("[Seeds] CurrentActivity is null");
+        var androidIapService = AndroidIapService;
+        if (androidIapService == null)
+            Debug.LogWarning("[Seeds] AndroidIapService is null");
+        RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", currentActivity, androidIapService, androidBridgeInstance, serverUrl,
             appKey));
 #elif UNITY_IOS && !UNITY_EDITOR
         Seeds_Init(serverUrl, appKey);
@@ -289,7 +297,13 @@ public class Seeds : MonoBehaviour
     public Seeds Init(string serverUrl, string appKey, string deviceId)
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", CurrentActivity, AndroidIapService, androidBridgeInstance, serverUrl,
+        var currentActivity = CurrentActivity;
+        if (currentActivity == null)
+            Debug.LogWarning("[Seeds] CurrentActivity is null");
+        var androidIapService = AndroidIapService;
+        if (androidIapService == null)
+            Debug.LogWarning("[Seeds] AndroidIapService is null");
+        RunOnUIThread(() => androidInstance.Call<AndroidJavaObject>("init", currentActivity, androidIapService, androidBridgeInstance, serverUrl,
             appKey, deviceId));
 #elif UNITY_IOS && !UNITY_EDITOR
         Seeds_InitWithDeviceId(serverUrl, appKey, deviceId);
@@ -333,14 +347,16 @@ public class Seeds : MonoBehaviour
     public void NotifyOnStart()
     {
         RunOnUIThread(() => {
-            androidInstance.Call("onStart");
+            if (androidInstance != null)
+                androidInstance.Call("onStart");
         });
     }
 
     public void NotifyOnStop()
     {
         RunOnUIThread(() => {
-            androidInstance.Call("onStop");
+            if (androidInstance != null)
+                androidInstance.Call("onStop");
         });
     }
 
