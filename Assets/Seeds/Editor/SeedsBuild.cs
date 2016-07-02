@@ -82,7 +82,7 @@ public static class SeedsBuild
 #else
 #if UNITY_EDITOR_OSX
         var playerAndroidManifestPath =
-            Path.Combine (Path.Combine (EditorApplication.applicationPath, "..", "PlaybackEngines/AndroidPlayer/Apk/AndroidManifest.xml");
+            Path.Combine (Path.Combine (EditorApplication.applicationPath, ".."), "PlaybackEngines/AndroidPlayer/Apk/AndroidManifest.xml");
 #else
         var playerAndroidManifestPath =
             Path.Combine (EditorApplication.applicationPath, "PlaybackEngines/AndroidPlayer/Apk/AndroidManifest.xml");
