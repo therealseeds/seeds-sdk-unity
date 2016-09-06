@@ -39,10 +39,14 @@ public class Seeds : MonoBehaviour
     public event Action<string> OnNoInAppMessageFound;
     public event Action OnAndroidIapServiceConnected;
     public event Action OnAndroidIapServiceDisconnected;
+    public event Action<string, int> OnInAppMessageStats;
+    public event Action<string, int> OnInAppPurchaseStats;
 
 #if UNITY_ANDROID && !UNITY_EDITOR
     private AndroidJavaObject androidInstance;
     private AndroidJavaObject androidBridgeInstance;
+    private AndroidJavaObject androidInAppMessageStatsListenerBridgeInstance;
+    private AndroidJavaObject androidInAppPurchaseStatsListenerBridgeInstance;
     private AndroidJavaObject inAppBillingServiceConnection;
 #endif
 
@@ -71,17 +75,25 @@ public class Seeds : MonoBehaviour
     void Start()
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        using (var seedsClass = new AndroidJavaClass("com.playseeds.android.sdk.Seeds"))
+        using (var javaClass = new AndroidJavaClass("com.playseeds.android.sdk.Seeds"))
         {
-            androidInstance = seedsClass.CallStatic<AndroidJavaObject>("sharedInstance");
+            androidInstance = javaClass.CallStatic<AndroidJavaObject>("sharedInstance");
         }
-        using (var inAppMessageListenerBridgeClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppMessageListenerBridge"))
+        using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppMessageListenerBridge"))
         {
-            androidBridgeInstance = inAppMessageListenerBridgeClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+            androidBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
         }
-        using (var inAppBillingServiceConnectionClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppBillingServiceConnection"))
+        using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppMessageStatsListenerBridge"))
         {
-            inAppBillingServiceConnection = inAppBillingServiceConnectionClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+            androidInAppMessageStatsListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+        }
+        using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppPurchaseStatsListenerBridge"))
+        {
+            androidInAppPurchaseStatsListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+        }
+        using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppBillingServiceConnection"))
+        {
+            inAppBillingServiceConnection = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
         }
         inAppBillingServiceConnection.Call("connect");
 #elif UNITY_IOS && !UNITY_EDITOR
@@ -242,7 +254,7 @@ public class Seeds : MonoBehaviour
     void onAndroidIapServiceConnected(string notUsed)
     {
         if (TraceEnabled)
-            Debug.Log("[Seeds] onAndroidIapServiceConnected()");
+            Debug.Log("[Seeds] OnAndroidIapServiceConnected()");
 
         if (AutoInitialize)
             Init(ServerURL, ApplicationKey);
@@ -254,7 +266,7 @@ public class Seeds : MonoBehaviour
     void onAndroidIapServiceDisconnected(string notUsed)
     {
         if (TraceEnabled)
-            Debug.Log("[Seeds] onAndroidIapServiceDisconnected()");
+            Debug.Log("[Seeds] OnAndroidIapServiceDisconnected()");
 
         if (AutoInitialize)
             Init(ServerURL, ApplicationKey);
@@ -263,6 +275,40 @@ public class Seeds : MonoBehaviour
             OnAndroidIapServiceDisconnected();
     }
 #endif
+
+    [Serializable]
+    public class InAppMessageStats
+    {
+        public string key;
+        public int shownCount;
+    }
+
+    void onInAppMessageStats (String json)
+    {
+        if (TraceEnabled)
+            Debug.Log (string.Format ("[Seeds] OnInAppMessageStats({0})", json));
+
+        InAppMessageStats stats = JsonUtility.FromJson<InAppMessageStats> (json);
+        if (OnInAppMessageStats != null)
+            OnInAppMessageStats (stats.key, stats.shownCount);
+    }
+
+    [Serializable]
+    public class InAppPurchaseStats
+    {
+        public string key;
+        public int purchasesCount;
+    }
+
+    void onInAppPurchaseStats (String json)
+    {
+        if (TraceEnabled)
+            Debug.Log (string.Format ("[Seeds] OnInAppPurchaseStats({0})", json));
+
+        InAppPurchaseStats stats = JsonUtility.FromJson<InAppPurchaseStats> (json);
+        if (OnInAppPurchaseStats != null)
+            OnInAppPurchaseStats (stats.key, stats.purchasesCount);
+    }
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
@@ -767,22 +813,69 @@ public class Seeds : MonoBehaviour
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
-    private static extern void Seeds_ShowInAppMessage(string messageId);
+    private static extern void Seeds_ShowInAppMessage(string messageId, string context);
 #endif
 
-    public void ShowInAppMessage(string messageId)
+    public void ShowInAppMessage(string messageId, string context)
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("showInAppMessage", messageId);
+        androidInstance.Call("showInAppMessage", messageId, context);
 #elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_ShowInAppMessage(messageId);
+        Seeds_ShowInAppMessage(messageId, context);
 #else
-        NotImplemented("ShowInAppMessage(string messageId)");
+        NotImplemented("ShowInAppMessage(string messageId, string context)");
 #endif
+    }
+
+    public void ShowInAppMessage (string messageId)
+    {
+        ShowInAppMessage (messageId, null);
     }
 
     public void ShowInAppMessage()
     {
-        ShowInAppMessage(null);
+        ShowInAppMessage(null, null);
     }
+
+    public void RequestInAppPurchaseCount ()
+    {
+        RequestInAppPurchaseCount (null);
+    }
+
+    public void RequestInAppPurchaseCount (string key)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call("requestInAppPurchaseCount", key, androidInAppPurchaseStatsListenerBridgeInstance);
+#elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RequestInAppPurchaseCount(key);
+#else
+        NotImplemented ("RequestInAppPurchaseCount(string key)");
+#endif
+    }
+
+#if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_RequestInAppPurchaseCount(string key);
+#endif
+
+    public void RequestInAppMessageStats ()
+    {
+        RequestInAppMessageStats (null);
+    }
+
+    public void RequestInAppMessageStats (string key)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call("requestInAppMessageStats", key, androidInAppMessageStatsListenerBridgeInstance);
+#elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RequestInAppMessageStats(key);
+#else
+        NotImplemented ("RequestInAppMessageStats(string key)");
+#endif
+    }
+
+#if UNITY_IOS && !UNITY_EDITOR
+    [DllImport ("__Internal")]
+    private static extern void Seeds_RequestInAppMessageStats(string key);
+#endif
 }

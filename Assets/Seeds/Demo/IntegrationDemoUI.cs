@@ -14,16 +14,26 @@ public class IntegrationDemoUI : MonoBehaviour
             Debug.Log("Demo received URL + " + url);
             lastUrlReceivedGameObject.GetComponent<Text>().text = url;
         };
+
+        var statsGameObject = GameObject.Find ("Stats");
+        Seeds.Instance.OnInAppMessageStats += (string key, int count) => {
+            statsGameObject.GetComponent<Text> ().text = string.Format ("OnInAppMessageStats({0}, {1})", key, count);
+        };
+        Seeds.Instance.OnInAppPurchaseStats += (string key, int count) => {
+            statsGameObject.GetComponent<Text> ().text = string.Format ("OnInAppPurchaseStats({0}, {1})", key, count);
+        };
     }
 
     public void RecordIAPEvent1()
     {
         Seeds.Instance.RecordIAPEvent("iap event 1", 9.99);
+        Seeds.Instance.RequestInAppMessageStats ();
     }
 
     public void RecordSeedsIAPEvent1()
     {
         Seeds.Instance.RecordSeedsIAPEvent("seeds iap event 1", 19.99);
+        Seeds.Instance.RequestInAppPurchaseCount ();
     }
 
     public void InAppMessage1()

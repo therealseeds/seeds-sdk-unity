@@ -14,23 +14,27 @@
 #if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR) && (!SEEDS_TARGET_WATCHKIT)
 #import <UIKit/UIKit.h>
 #endif
+
 @class SeedsEventQueue;
 @protocol SeedsInAppMessageDelegate;
 
 @interface Seeds : NSObject
 {
-	double unsentSessionLength;
-	NSTimer *timer;
+    double unsentSessionLength;
+    NSTimer *timer;
     time_t startTime;
-	double lastTime;
-	BOOL isSuspended;
+    double lastTime;
+    BOOL isSuspended;
     SeedsEventQueue *eventQueue;
+    NSDictionary *crashCustom;
+    NSMutableDictionary *_messageInfos;
 }
 
-@property (readonly, nonatomic, copy) NSString* deviceId;
+@property (nonatomic, copy) NSString* deviceId;
 @property (atomic, retain) id<SeedsInAppMessageDelegate> inAppMessageDelegate;
 
 @property (atomic, copy) NSString* inAppMessageId;
+@property (atomic, copy) NSString* inAppMessageContext;
 @property (atomic, assign) BOOL inAppMessageDoNotShow;
 @property (atomic, assign) BOOL adClicked;
 @property (atomic, copy) NSString* inAppMessageVariantName;
@@ -42,6 +46,8 @@
 - (void)start:(NSString *)appKey withHost:(NSString *)appHost andDeviceId:(NSString *)deviceId;
 
 - (NSString *)getAppKey;
+
+- (NSString *)getAppHost;
 
 - (BOOL)isStarted;
 
@@ -78,7 +84,19 @@ extern NSString* const kCLYUserCustom;
 - (BOOL)isInAppMessageLoaded:(NSString*)messageId;
 
 - (void)showInAppMessageIn:(UIViewController*)viewController;
+- (void)showInAppMessageIn:(UIViewController*)viewController withContext:(NSString*)messageContext;
 - (void)showInAppMessage:(NSString*)messageId in:(UIViewController*)viewController;
+- (void)showInAppMessage:(NSString*)messageId in:(UIViewController*)viewController withContext:(NSString*)messageContext;
+
+#pragma mark - Seeds Statistics
+
+typedef void (^ SeedsInAppPurchaseStatsCallback)(NSString* key, int purchasesCount);
+- (void)requestInAppPurchaseCount:(SeedsInAppPurchaseStatsCallback)callback of:(NSString*)key;
+- (void)requestInAppPurchasesCount:(SeedsInAppPurchaseStatsCallback)callback;
+
+typedef void (^ SeedsInAppMessageStatsCallback)(NSString* messageId, int shownCount);
+- (void)requestInAppMessageStats:(SeedsInAppMessageStatsCallback)callback;
+- (void)requestInAppMessageStats:(SeedsInAppMessageStatsCallback)callback of:(NSString*)messageId;
 
 #pragma mark - Seeds Messaging
 #if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR) && (!SEEDS_TARGET_WATCHKIT)
@@ -148,7 +166,7 @@ extern NSString* const kCLYUserCustom;
 #pragma mark - Seeds CrashReporting
 /*
  This SDK can be used for Seeds CrashReporting service in addition to Seeds Analytics.
- If the only thing you need is Seeds Analytics, you can skip this section. 
+ If the only thing you need is Seeds Analytics, you can skip this section.
  For Seeds CrashReporting, you'll need to add one more line of Seeds code to your application:
  
  For iOS, inside `application:didFinishLaunchingWithOptions:` method, just after the line you started Seeds, add this line:
@@ -167,7 +185,7 @@ extern NSString* const kCLYUserCustom;
  - Total RAM
  - Used Disk
  - Total Disk
- - Battery Level 
+ - Battery Level
  - Device Orientation
  - Connection Type
  - OpenGL ES Version

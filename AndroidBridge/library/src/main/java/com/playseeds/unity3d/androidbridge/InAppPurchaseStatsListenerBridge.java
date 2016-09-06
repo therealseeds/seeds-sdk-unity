@@ -11,6 +11,11 @@ public class InAppPurchaseStatsListenerBridge implements IInAppPurchaseStatsList
     }
 
     public void onInAppPurchaseStats(String key, int purchasesCount) {
-        UnityPlayer.UnitySendMessage(unityObjectName, "onInAppPurchaseStats", key);
+        UnityPlayer.UnitySendMessage(unityObjectName, "onInAppPurchaseStats",
+                "{\"key\":\""+ key +"\",\"purchasesCount\":"+ purchasesCount +"}");
+    }
+
+    public static InAppPurchaseStatsListenerBridge create(String unityObjectName) {
+        return new InAppPurchaseStatsListenerBridge(unityObjectName);
     }
 }

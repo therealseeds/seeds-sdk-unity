@@ -11,6 +11,11 @@ public class InAppMessageStatsListenerBridge implements IInAppMessageStatsListen
     }
 
     public void onInAppMessageStats(String key, int shownCount) {
-        UnityPlayer.UnitySendMessage(unityObjectName, "onInAppMessageStats", key);
+        UnityPlayer.UnitySendMessage(unityObjectName, "onInAppMessageStats",
+                "{\"key\":\""+ key +"\",\"shownCount\":"+ shownCount +"}");
+    }
+
+    public static InAppMessageStatsListenerBridge create(String unityObjectName) {
+        return new InAppMessageStatsListenerBridge(unityObjectName);
     }
 }

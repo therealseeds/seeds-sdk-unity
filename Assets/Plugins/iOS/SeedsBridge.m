@@ -227,7 +227,7 @@ const char* Seeds_GetMessageVariantName()
 
 void Seeds_RequestInAppMessage(const char* pcsMessageId)
 {
-    NSString* messageId = [NSString stringWithUTF8String:csMessageId];
+    NSString* messageId = [NSString stringWithUTF8String:pcsMessageId];
     [Seeds.sharedInstance requestInAppMessage:messageId];
 }
 
@@ -237,8 +237,35 @@ BOOL Seeds_IsInAppMessageLoaded(const char* pcsMessageId)
     return [Seeds.sharedInstance isInAppMessageLoaded:messageId];
 }
 
-void Seeds_ShowInAppMessage(const char* pcsMessageId)
+void Seeds_ShowInAppMessage(const char* pcsMessageId, const char* pcsContext)
 {
-    NSString* messageId = [NSString stringWithUTF8String:csMessageId];
-    [Seeds.sharedInstance showInAppMessage:messageId in:UnityGetGLViewController()];
+    NSString* messageId = [NSString stringWithUTF8String:pcsMessageId];
+    NSString* context = [NSString stringWithUTF8String:pcsContext];
+    [Seeds.sharedInstance showInAppMessage:messageId in:UnityGetGLViewController() withContext:context];
+}
+
+void Seeds_RequestInAppPurchaseCount(const char* pcsKey)
+{
+    NSString* key = pcsKey ? [NSString stringWithUTF8String:pcsKey] : nil;
+    [Seeds.sharedInstance requestInAppPurchaseCount:^(NSString* key, int purchasesCount) {
+        NSString* json = [NSString stringWithFormat:@"{\"key\":\"%@\",\"purchasesCount\":%d}", key ? key : @"", purchasesCount];
+        UnitySendMessage(
+            [SeedsInAppMessageDelegateProxy.sharedInstance.gameObjectName UTF8String],
+            "onInAppPurchaseStats",
+            [json UTF8String]);
+    }
+                                                 of:key];
+}
+
+void Seeds_RequestInAppMessageStats(const char* pcsKey)
+{
+    NSString* key = pcsKey ? [NSString stringWithUTF8String:pcsKey] : nil;
+    [Seeds.sharedInstance requestInAppMessageStats:^(NSString* key, int shownCount) {
+        NSString* json = [NSString stringWithFormat:@"{\"key\":\"%@\",\"shownCount\":%d}", key ? key : @"", shownCount];
+        UnitySendMessage(
+            [SeedsInAppMessageDelegateProxy.sharedInstance.gameObjectName UTF8String],
+            "onInAppMessageStats",
+            [json UTF8String]);
+    }
+                                                 of:key];
 }
