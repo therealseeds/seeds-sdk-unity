@@ -227,20 +227,20 @@ const char* Seeds_GetMessageVariantName()
 
 void Seeds_RequestInAppMessage(const char* pcsMessageId)
 {
-    NSString* messageId = [NSString stringWithUTF8String:pcsMessageId];
+    NSString* messageId = pcsMessageId ? [NSString stringWithUTF8String:pcsMessageId] : nil;
     [Seeds.sharedInstance requestInAppMessage:messageId];
 }
 
 BOOL Seeds_IsInAppMessageLoaded(const char* pcsMessageId)
 {
-    NSString* messageId = [NSString stringWithUTF8String:pcsMessageId];
+    NSString* messageId = pcsMessageId ? [NSString stringWithUTF8String:pcsMessageId] : nil;
     return [Seeds.sharedInstance isInAppMessageLoaded:messageId];
 }
 
 void Seeds_ShowInAppMessage(const char* pcsMessageId, const char* pcsContext)
 {
-    NSString* messageId = [NSString stringWithUTF8String:pcsMessageId];
-    NSString* context = [NSString stringWithUTF8String:pcsContext];
+    NSString* messageId = pcsMessageId ? [NSString stringWithUTF8String:pcsMessageId] : nil;
+    NSString* context = pcsContext ? [NSString stringWithUTF8String:pcsContext] : nil;
     [Seeds.sharedInstance showInAppMessage:messageId in:UnityGetGLViewController() withContext:context];
 }
 
