@@ -8,7 +8,8 @@ then
   echo "                           the correct locations in Unity SDK. Overwrites the old artifacts."
   echo "                           You must set SEEDS_ANDROID_SDK, SEEDS_IOS_SDK, ANDROID_SDK envs.\n"
 
-  echo "deploy.sh packages         Builds the normal & legacy packages (from SeedsBuild class)\n"
+  echo "deploy.sh packages <ver>   Builds the normal & legacy packages (from SeedsBuild class)\n"
+  echo "deploy.sh packages <ver>   and names them after the specified version (e.g. '1.4.5')\n"
 
   echo "deploy.sh bintray <ver>    Deploys the packages to Bintray, using the specified version."
 	exit 1
@@ -17,6 +18,7 @@ fi
 operation=$1
 
 if [[ $operation = "mobile-sdks" ]]; then
+  # Don't open the directories in Finder when running the scripts
   export NOT_INTERACTIVE=1
 
   if [ "${SEEDS_ANDROID_SDK+1}" ]; then
@@ -44,4 +46,6 @@ fi
 
 if [[ $operation = "bintray" ]]; then
   echo "To be implemented"
+
+  echo "Remember to update links and versions in the Unity SDK documentation page!"
 fi
