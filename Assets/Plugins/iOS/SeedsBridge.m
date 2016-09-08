@@ -83,24 +83,28 @@
     return self;
 }
 
-- (void)seedsInAppMessageClicked:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId
+
+- (void)seedsInAppMessageClicked:(NSString*)messageId
 {
     UnitySendMessage([self.gameObjectName UTF8String], "inAppMessageClicked", [messageId UTF8String]);
 }
 
-- (void)seedsInAppMessageClosed:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId andCompleted:(BOOL)completed
-{
-    UnitySendMessage([self.gameObjectName UTF8String],
-                     completed ? "inAppMessageClosedComplete" : "inAppMessageClosedIncomplete",
-                     [messageId UTF8String]);
+- (void)seedsInAppMessageClicked:(NSString *)messageId withDynamicPrice:(double)price {
+    NSString* msg = [NSString stringWithFormat:@"%@ %1.2f", messageId, price];
+    UnitySendMessage([self.gameObjectName UTF8String], "inAppMessageClickedWithDynamicPrice", [msg UTF8String]);
 }
 
-- (void)seedsInAppMessageLoadSucceeded:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId
+- (void)seedsInAppMessageDismissed:(NSString *)messageId
+{
+    UnitySendMessage([self.gameObjectName UTF8String], "inAppMessageDismissed", [messageId UTF8String]);
+}
+
+- (void)seedsInAppMessageLoadSucceeded:(NSString*)messageId
 {
     UnitySendMessage([self.gameObjectName UTF8String], "inAppMessageLoadSucceeded", [messageId UTF8String]);
 }
 
-- (void)seedsInAppMessageShown:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId withSuccess:(BOOL)success
+- (void)seedsInAppMessageShown:(NSString*)messageId withSuccess:(BOOL)success
 {
     UnitySendMessage([self.gameObjectName UTF8String],
                      success ? "inAppMessageShownSuccessfully" : "inAppMessageShownInsuccessfully",
