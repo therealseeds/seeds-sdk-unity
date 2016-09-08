@@ -220,12 +220,12 @@ void Seeds_EnableCrashReporting()
 void Seeds_SetMessageVariantName(const char* pcsMessageVariantName)
 {
     NSString* messageVariantName = [NSString stringWithUTF8String:pcsMessageVariantName];
-    Seeds.sharedInstance.inAppMessageVariantName = messageVariantName;
+    Seeds.sharedInstance.currentMessageId = messageVariantName;
 }
 
 const char* Seeds_GetMessageVariantName()
 {
-    const char* pcsMessageVariantName = [Seeds.sharedInstance.inAppMessageVariantName UTF8String];
+    const char* pcsMessageVariantName = [Seeds.sharedInstance.currentMessageId UTF8String];
     return strdup(pcsMessageVariantName);
 }
 
