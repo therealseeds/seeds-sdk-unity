@@ -16,18 +16,21 @@
 @optional
 
 // Callback signatures for an app with a single interstitial
-- (void)seedsInAppMessageClicked:(SeedsInAppMessage*)inAppMessage;
-- (void)seedsInAppMessageClosed:(SeedsInAppMessage*)inAppMessage andCompleted:(BOOL)completed;
-- (void)seedsInAppMessageLoadSucceeded:(SeedsInAppMessage*)inAppMessage;
-- (void)seedsInAppMessageShown:(SeedsInAppMessage*)inAppMessage withSuccess:(BOOL)success;
+- (void)seedsInAppMessageLoadSucceeded;
+- (void)seedsInAppMessageShown:(BOOL)success;
 - (void)seedsNoInAppMessageFound;
+- (void)seedsInAppMessageClicked;
+- (void)seedsInAppMessageDismissed;
 
 // Callback signatures for an app with multiple interstitials
-- (void)seedsInAppMessageClicked:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId;
-- (void)seedsInAppMessageClosed:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId andCompleted:(BOOL)completed;
-- (void)seedsInAppMessageLoadSucceeded:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId;
-- (void)seedsInAppMessageShown:(SeedsInAppMessage*)inAppMessage withMessageId:(NSString*)messageId withSuccess:(BOOL)success;
+- (void)seedsInAppMessageLoadSucceeded:(NSString*)messageId;
+- (void)seedsInAppMessageShown:(NSString*)messageId withSuccess:(BOOL)success;
 - (void)seedsNoInAppMessageFound:(NSString*)messageId;
+- (void)seedsInAppMessageClicked:(NSString*)messageId;
+- (void)seedsInAppMessageDismissed:(NSString*)messageId;
+
+// Callback signatures for an app with multiple interstitials with dynamic pricing
+- (void)seedsInAppMessageClicked:(NSString *)messageId withDynamicPrice:(double)price;
 
 @end
 

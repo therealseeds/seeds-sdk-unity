@@ -46,7 +46,7 @@ public class IntegrationDemoUI : MonoBehaviour
 
     public void InAppMessage2()
     {
-        if (Seeds.Instance.IsInAppMessageLoaded("5746851bb29ee753053a7c9a"))
+		if (Seeds.Instance.IsInAppMessageLoaded("5746851bb29ee753053a7c9a"))
             Seeds.Instance.ShowInAppMessage("5746851bb29ee753053a7c9a");
         else
             Seeds.Instance.RequestInAppMessage("5746851bb29ee753053a7c9a");

@@ -31,8 +31,8 @@ public class Seeds : MonoBehaviour
     public string ApplicationKey;
 
     public event Action<string> OnInAppMessageClicked;
-    public event Action<string> OnInAppMessageClosedComplete;
-    public event Action<string> OnInAppMessageClosedIncomplete;
+	public event Action<string, decimal> OnInAppMessageClickedWithDynamicPrice;
+	public event Action<string> OnInAppMessageDismissed;
     public event Action<string> OnInAppMessageLoadSucceeded;
     public event Action<string> OnInAppMessageShownSuccessfully;
     public event Action<string> OnInAppMessageShownInsuccessfully;
@@ -196,22 +196,26 @@ public class Seeds : MonoBehaviour
             OnInAppMessageClicked(messageId);
     }
 
-    void inAppMessageClosedComplete(string messageId)
-    {
-        if (TraceEnabled)
-            Debug.Log(string.Format ("[Seeds] OnInAppMessageClosedComplete({0})", messageId));
-        
-        if (OnInAppMessageClosedComplete != null)
-            OnInAppMessageClosedComplete(messageId);
-    }
+	void inAppMessageClickedWithDynamicPrice(string msg)
+	{
+		var msgParts = msg.Split(' ');
+		var messageId = msgParts[0];
+		var price = Convert.ToDecimal(msgParts[1]);
 
-    void inAppMessageClosedIncomplete(string messageId)
+		if (TraceEnabled)
+			Debug.Log(string.Format("[Seeds] OnInAppMessageClickedWithDynamicPrice({0}, {1})", messageId, price));
+
+		if (OnInAppMessageClickedWithDynamicPrice != null)
+			OnInAppMessageClickedWithDynamicPrice(messageId, price);
+	}
+
+    void inAppMessageDismissed(string messageId)
     {
         if (TraceEnabled)
-            Debug.Log(string.Format("[Seeds] OnInAppMessageClosedIncomplete({0})", messageId));
+            Debug.Log(string.Format ("[Seeds] OnInAppMessageDismissed({0})", messageId));
         
-        if (OnInAppMessageClosedIncomplete != null)
-            OnInAppMessageClosedIncomplete(messageId);
+        if (OnInAppMessageDismissed != null)
+            OnInAppMessageDismissed(messageId);
     }
 
     void inAppMessageLoadSucceeded(string messageId)

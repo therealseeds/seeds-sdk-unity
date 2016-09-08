@@ -37,6 +37,7 @@
 @property (atomic, copy) NSString* inAppMessageContext;
 @property (atomic, assign) BOOL inAppMessageDoNotShow;
 @property (atomic, assign) BOOL adClicked;
+@property (atomic, assign) NSURL* clickUrl;
 @property (atomic, copy) NSString* inAppMessageVariantName;
 
 + (instancetype)sharedInstance;
