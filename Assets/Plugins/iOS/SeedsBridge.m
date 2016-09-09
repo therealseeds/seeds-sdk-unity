@@ -217,18 +217,6 @@ void Seeds_EnableCrashReporting()
 //    Seeds.sharedInstance.inAppMessageABTestingEnabled = abTestingOn;
 //}
 
-void Seeds_SetMessageVariantName(const char* pcsMessageVariantName)
-{
-    NSString* messageVariantName = [NSString stringWithUTF8String:pcsMessageVariantName];
-    Seeds.sharedInstance.currentMessageId = messageVariantName;
-}
-
-const char* Seeds_GetMessageVariantName()
-{
-    const char* pcsMessageVariantName = [Seeds.sharedInstance.currentMessageId UTF8String];
-    return strdup(pcsMessageVariantName);
-}
-
 void Seeds_RequestInAppMessage(const char* pcsMessageId)
 {
     NSString* messageId = pcsMessageId ? [NSString stringWithUTF8String:pcsMessageId] : nil;
