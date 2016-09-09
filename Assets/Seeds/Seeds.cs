@@ -50,6 +50,14 @@ public class Seeds : MonoBehaviour
     private AndroidJavaObject inAppBillingServiceConnection;
 #endif
 
+	#if UNITY_IOS && !UNITY_EDITOR
+	[DllImport ("__Internal")]
+	private static extern void Seeds_SetGameObjectName(string gameObjectName);
+
+	[DllImport ("__Internal")]
+	private static extern void Seeds_Setup(bool registerAsPlugin);
+	#endif
+
     void Awake()
     {
         if (Instance != null)
@@ -62,53 +70,42 @@ public class Seeds : MonoBehaviour
 
         DontDestroyOnLoad(this);
         Instance = this;
+
+		#if UNITY_ANDROID && !UNITY_EDITOR
+		using (var javaClass = new AndroidJavaClass("com.playseeds.android.sdk.Seeds"))
+		{
+		androidInstance = javaClass.CallStatic<AndroidJavaObject>("sharedInstance");
+		}
+		using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppMessageListenerBridge"))
+		{
+		androidBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+		}
+		using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppMessageStatsListenerBridge"))
+		{
+		androidInAppMessageStatsListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+		}
+		using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppPurchaseStatsListenerBridge"))
+		{
+		androidInAppPurchaseStatsListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+		}
+		using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppBillingServiceConnection"))
+		{
+		inAppBillingServiceConnection = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+		}
+		inAppBillingServiceConnection.Call("connect");
+		#elif UNITY_IOS && !UNITY_EDITOR
+		Seeds_SetGameObjectName(gameObject.name);
+		Seeds_Setup(false);
+		#endif
+
+		if (AutoInitialize)
+			Init(ServerURL, ApplicationKey);
+
+		#if UNITY_ANDROID && !UNITY_EDITOR
+		NotifyOnStart();
+		#endif
     }
-
-    #if UNITY_IOS && !UNITY_EDITOR
-    [DllImport ("__Internal")]
-    private static extern void Seeds_SetGameObjectName(string gameObjectName);
-
-    [DllImport ("__Internal")]
-    private static extern void Seeds_Setup(bool registerAsPlugin);
-    #endif
-
-    void Start()
-    {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        using (var javaClass = new AndroidJavaClass("com.playseeds.android.sdk.Seeds"))
-        {
-            androidInstance = javaClass.CallStatic<AndroidJavaObject>("sharedInstance");
-        }
-        using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppMessageListenerBridge"))
-        {
-            androidBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
-        }
-        using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppMessageStatsListenerBridge"))
-        {
-            androidInAppMessageStatsListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
-        }
-        using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppPurchaseStatsListenerBridge"))
-        {
-            androidInAppPurchaseStatsListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
-        }
-        using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppBillingServiceConnection"))
-        {
-            inAppBillingServiceConnection = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
-        }
-        inAppBillingServiceConnection.Call("connect");
-#elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_SetGameObjectName(gameObject.name);
-        Seeds_Setup(false);
-#endif
-
-        if (AutoInitialize)
-            Init(ServerURL, ApplicationKey);
-
-        #if UNITY_ANDROID && !UNITY_EDITOR
-        NotifyOnStart();
-        #endif
-    }
-
+		
     void OnApplicationPause(bool pauseStatus)
     {
         if (TraceEnabled)
@@ -726,51 +723,6 @@ public class Seeds : MonoBehaviour
 //        NotImplemented("SetABTestingOn(bool abTestingOn)");
 //        #endif
 //    }
-
-#if UNITY_IOS && !UNITY_EDITOR
-    [DllImport ("__Internal")]
-    private static extern void Seeds_SetMessageVariantName(string messageVariantName);
-#endif
-
-    public void SetMessageVariantName(string messageVariantName)
-    {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("setMessageVariantName", messageVariantName);
-#elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_SetMessageVariantName(messageVariantName);
-#else
-        NotImplemented("SetMessageVariantName(string messageVariantName)");
-#endif
-    }
-
-#if UNITY_IOS && !UNITY_EDITOR
-    [DllImport ("__Internal")]
-    private static extern string Seeds_GetMessageVariantName();
-#endif
-
-    public string GetMessageVariantName()
-    {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        return androidInstance.Call<string>("getMessageVariantName");
-#elif UNITY_IOS && !UNITY_EDITOR
-        return Seeds_GetMessageVariantName();
-#else
-        NotImplemented("GetMessageVariantName()");
-        return null;
-#endif
-    }
-
-    public string MessageVariantName
-    {
-        get
-        {
-            return GetMessageVariantName();
-        }
-        set
-        {
-            SetMessageVariantName(value);
-        }
-    }
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]

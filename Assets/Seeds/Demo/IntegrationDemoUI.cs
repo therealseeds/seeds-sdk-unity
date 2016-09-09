@@ -22,6 +22,9 @@ public class IntegrationDemoUI : MonoBehaviour
         Seeds.Instance.OnInAppPurchaseStats += (string key, int count) => {
             statsGameObject.GetComponent<Text> ().text = string.Format ("OnInAppPurchaseStats({0}, {1})", key, count);
         };
+
+		Seeds.Instance.RequestInAppMessage("575f872a64bc1e5b0eca506f");
+		Seeds.Instance.RequestInAppMessage("5746851bb29ee753053a7c9a");
     }
 
     public void RecordIAPEvent1()
