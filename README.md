@@ -6,7 +6,7 @@
 We also have available:
 - [API](https://github.com/therealseeds/seeds-public-api)
 - [Android SDK](https://github.com/therealseeds/seeds-sdk-android)
-- iOS SDK coming soon
+- [iOS SDK](https://github.com/therealseeds/seeds-sdk-ios)
 
 ##The Seeds Unity SDK
 
