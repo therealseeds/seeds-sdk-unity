@@ -8,8 +8,10 @@ then
   echo "                           the correct locations in Unity SDK. Overwrites the old artifacts."
   echo "                           You must set SEEDS_ANDROID_SDK, SEEDS_IOS_SDK, ANDROID_SDK envs.\n"
 
+  echo "deploy.sh android-bridge   Builds the Android bridge code. You must set ANDROID_SDK env."
+
   echo "deploy.sh packages <ver>   Builds the normal & legacy packages (from SeedsBuild class)\n"
-  echo "deploy.sh packages <ver>   and names them after the specified version (e.g. '1.4.5')\n"
+  echo "                           and names them after the specified version (e.g. '1.4.5').\n"
 
   echo "deploy.sh bintray <ver>    Deploys the packages to Bintray, using the specified version."
 	exit 1
@@ -34,8 +36,13 @@ if [[ $operation = "mobile-sdks" ]]; then
   echo "\nSDKs builded and moved to the Unity SDK."
 fi
 
+if [[ $operation = "android-bridge" ]]; then
+  ANDROID_HOME=$ANDROID_SDK $DIR/AndroidBridge/BuildUnity3D.sh
+fi
+
 if [[ $operation = "packages" ]]; then
   rm -rf SeedsSDK_Legacy.unitypackage
+
   rm -rf SeedsSDK.unitypackage
 
   /Applications/Unity/Unity.app/Contents/MacOS/Unity -batchmode -projectPath "$DIR" -executeMethod SeedsBuild.BuildPackage -quit -logFile /dev/stdout
