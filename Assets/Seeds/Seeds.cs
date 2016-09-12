@@ -39,8 +39,9 @@ public class Seeds : MonoBehaviour
     public event Action<string> OnNoInAppMessageFound;
     public event Action OnAndroidIapServiceConnected;
     public event Action OnAndroidIapServiceDisconnected;
-    public event Action<string, int> OnInAppMessageStats;
-    public event Action<string, int> OnInAppPurchaseStats;
+	public event Action<string, int, string> OnInAppPurchaseCount;
+	public event Action<string, int, string> OnInAppMessageShowCount;
+	public event Action<string, string, string> OnGenericUserBehaviorQuery;
 
 #if UNITY_ANDROID && !UNITY_EDITOR
     private AndroidJavaObject androidInstance;
@@ -278,38 +279,58 @@ public class Seeds : MonoBehaviour
 #endif
 
     [Serializable]
-    public class InAppMessageStats
+    public class InAppMessageShowCount
     {
-        public string key;
-        public int shownCount;
+		public string errorMessage;
+        public string messageId;
+        public int showCount;
     }
 
-    void onInAppMessageStats (String json)
+    void onInAppMessageShowCount (String json)
     {
         if (TraceEnabled)
-            Debug.Log (string.Format ("[Seeds] OnInAppMessageStats({0})", json));
+			Debug.Log (string.Format ("[Seeds] OnInAppMessageShowCount({0})", json));
 
-        InAppMessageStats stats = JsonUtility.FromJson<InAppMessageStats> (json);
-        if (OnInAppMessageStats != null)
-            OnInAppMessageStats (stats.key, stats.shownCount);
+		InAppMessageShowCount stats = JsonUtility.FromJson<InAppMessageShowCount> (json);
+        if (OnInAppMessageShowCount != null)
+			OnInAppMessageShowCount (stats.errorMessage, stats.showCount, stats.messageId);
     }
 
     [Serializable]
-    public class InAppPurchaseStats
+    public class InAppPurchaseCount
     {
+		public string errorMessage;
         public string key;
         public int purchasesCount;
     }
 
-    void onInAppPurchaseStats (String json)
+	void onInAppPurchaseCount (String json)
     {
         if (TraceEnabled)
-            Debug.Log (string.Format ("[Seeds] OnInAppPurchaseStats({0})", json));
+			Debug.Log (string.Format ("[Seeds] OnInAppPurchaseCount({0})", json));
 
-        InAppPurchaseStats stats = JsonUtility.FromJson<InAppPurchaseStats> (json);
-        if (OnInAppPurchaseStats != null)
-            OnInAppPurchaseStats (stats.key, stats.purchasesCount);
+		InAppPurchaseCount stats = JsonUtility.FromJson<InAppPurchaseCount> (json);
+		if (OnInAppPurchaseCount != null)
+			OnInAppPurchaseCount (stats.errorMessage, stats.purchasesCount, stats.key);
     }
+
+	[Serializable]
+	public class GenericUserBehaviorQuery
+	{
+		public string errorMessage;
+		public string queryPath;
+		public string result;
+	}
+
+	void onGenericUserBehaviorQuery (String json)
+	{
+		if (TraceEnabled)
+			Debug.Log (string.Format ("[Seeds] OnGenericUserBehaviorQuery({0})", json));
+
+		GenericUserBehaviorQuery stats = JsonUtility.FromJson<GenericUserBehaviorQuery> (json);
+		if (OnGenericUserBehaviorQuery != null)
+			OnGenericUserBehaviorQuery (stats.errorMessage, stats.result, stats.queryPath);
+	}
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
@@ -494,26 +515,6 @@ public class Seeds : MonoBehaviour
         NotImplemented("RecordIAPEvent(string key, double price)");
 #endif
     }
-
-// new 
-
-#if UNITY_IOS && !UNITY_EDITOR
-	[DllImport ("__Internal")]
-	private static extern void Seeds_TrackPurchase(string key, double price);
-#endif
-	
-	public void TrackPurchase(string key, double price)
-	{
-#if UNITY_ANDROID && !UNITY_EDITOR
-		androidInstance.Call("trackPurchase", key, price);
-#elif UNITY_IOS && !UNITY_EDITOR
-		Seeds_TrackPurchase(key, price);
-#else
-		NotImplemented("TrackPurchase(string key, double price)");
-#endif
-	}
-
-//
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
@@ -793,7 +794,7 @@ public class Seeds : MonoBehaviour
         ShowInAppMessage(null, null);
     }
 
-    public void RequestInAppPurchaseCount ()
+    public void RequestTotalInAppPurchaseCount ()
     {
         RequestInAppPurchaseCount (null);
     }
@@ -814,17 +815,17 @@ public class Seeds : MonoBehaviour
     private static extern void Seeds_RequestInAppPurchaseCount(string key);
 #endif
 
-    public void RequestInAppMessageStats ()
+    public void RequestTotalInAppMessageShowCount ()
     {
-        RequestInAppMessageStats (null);
+		RequestInAppMessageShowCount (null);
     }
 
-    public void RequestInAppMessageStats (string key)
+	public void RequestInAppMessageShowCount (string messageId)
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("requestInAppMessageStats", key, androidInAppMessageStatsListenerBridgeInstance);
+		androidInstance.Call("requestInAppMessageShowCount", messageId, androidInAppMessageShowCountListenerBridgeInstance);
 #elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_RequestInAppMessageStats(key);
+		Seeds_RequestInAppMessageShowCount(messageId);
 #else
         NotImplemented ("RequestInAppMessageStats(string key)");
 #endif
@@ -832,6 +833,23 @@ public class Seeds : MonoBehaviour
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
-    private static extern void Seeds_RequestInAppMessageStats(string key);
+	private static extern void Seeds_RequestInAppMessageShowCount(string key);
+#endif
+
+	public void RequestGenericUserBehaviorQuery (string queryPath)
+	{
+#if UNITY_ANDROID && !UNITY_EDITOR
+		androidInstance.Call("requestGenericUserBehaviorQuery", queryPath, androidGenericUserBehaviorQueryBridgeInstance);
+#elif UNITY_IOS && !UNITY_EDITOR
+		Seeds_RequestGenericUserBehaviorQuery(queryPath);
+#else
+		NotImplemented ("RequestGenericUserBehaviorQuery(string key)");
+#endif
+	}
+
+#if UNITY_IOS && !UNITY_EDITOR
+	[DllImport ("__Internal")]
+	private static extern void Seeds_RequestGenericUserBehaviorQuery(string queryPath);
 #endif
 }
+

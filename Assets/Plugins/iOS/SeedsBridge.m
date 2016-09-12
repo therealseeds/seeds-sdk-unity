@@ -191,12 +191,6 @@ void Seeds_RecordSeedsIAPEvent(const char* pcsKey, double price)
     [Seeds.sharedInstance recordSeedsIAPEvent:key price:price];
 }
 
-void Seeds_TrackPurchase(const char* pcsKey, double price)
-{
-    NSString* key = [NSString stringWithUTF8String:pcsKey];
-    [Seeds.sharedInstance trackPurchase:key price:price];
-}
-
 void Seeds_SetLocation(double lat, double lon)
 {
     [Seeds.sharedInstance setLocation:lat longitude:lon];
@@ -239,25 +233,65 @@ void Seeds_ShowInAppMessage(const char* pcsMessageId, const char* pcsContext)
 void Seeds_RequestInAppPurchaseCount(const char* pcsKey)
 {
     NSString* key = pcsKey ? [NSString stringWithUTF8String:pcsKey] : nil;
-    [Seeds.sharedInstance requestInAppPurchaseCount:^(NSString* key, int purchasesCount) {
-        NSString* json = [NSString stringWithFormat:@"{\"key\":\"%@\",\"purchasesCount\":%d}", key ? key : @"", purchasesCount];
+    [Seeds.sharedInstance requestInAppPurchaseCount:^(NSString* errorMessage, int purchasesCount) {
+        NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
+                            errorMessage ? errorMessage : @"", @"errorMessage",
+                            key ? key : @"", @"key",
+                            [NSString stringWithFormat:@"%d", purchasesCount], @"purchasesCount",
+                            nil];
+
+        NSError *err;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict options:0 error:&err];
+        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+
         UnitySendMessage(
             [SeedsInAppMessageDelegateProxy.sharedInstance.gameObjectName UTF8String],
-            "onInAppPurchaseStats",
-            [json UTF8String]);
+            "onInAppPurchaseCount",
+            [jsonString UTF8String]);
     }
                                                  of:key];
 }
 
-void Seeds_RequestInAppMessageStats(const char* pcsKey)
+void Seeds_RequestInAppMessageShowCount(const char* pcsMessageId)
 {
-    NSString* key = pcsKey ? [NSString stringWithUTF8String:pcsKey] : nil;
-    [Seeds.sharedInstance requestInAppMessageStats:^(NSString* key, int shownCount) {
-        NSString* json = [NSString stringWithFormat:@"{\"key\":\"%@\",\"shownCount\":%d}", key ? key : @"", shownCount];
+    NSString* messageId = pcsMessageId ? [NSString stringWithUTF8String:pcsMessageId] : nil;
+    [Seeds.sharedInstance requestInAppMessageShowCount:^(NSString* errorMessage, int showCount) {
+        NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
+                              errorMessage ? errorMessage : @"", @"errorMessage",
+                              messageId ? messageId : @"", @"messageId",
+                              [NSString stringWithFormat:@"%d", showCount], @"showCount",
+                              nil];
+
+        NSError *err;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict options:0 error:&err];
+        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+
         UnitySendMessage(
             [SeedsInAppMessageDelegateProxy.sharedInstance.gameObjectName UTF8String],
-            "onInAppMessageStats",
-            [json UTF8String]);
+            "onInAppMessageShowCount",
+            [jsonString UTF8String]);
     }
-                                                 of:key];
+                                                 of:messageId];
+}
+
+void Seeds_RequestGenericUserBehaviorQuery(const char* pcsQueryPath)
+{
+    NSString* queryPath = pcsQueryPath ? [NSString stringWithUTF8String:pcsQueryPath] : nil;
+    [Seeds.sharedInstance requestGenericUserBehaviorQuery:^(NSString* errorMessage, id result) {
+        NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
+                              errorMessage ? errorMessage : @"", @"errorMessage",
+                              queryPath ? queryPath : @"", @"queryPath",
+                              [result stringValue], @"result",
+                              nil];
+
+        NSError *err;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict options:0 error:&err];
+        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+
+        UnitySendMessage(
+                         [SeedsInAppMessageDelegateProxy.sharedInstance.gameObjectName UTF8String],
+                         "onGenericUserBehaviorQuery",
+                         [jsonString UTF8String]);
+    }
+                                                    of:queryPath];
 }
