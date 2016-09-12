@@ -46,8 +46,9 @@ public class Seeds : MonoBehaviour
 #if UNITY_ANDROID && !UNITY_EDITOR
     private AndroidJavaObject androidInstance;
     private AndroidJavaObject androidBridgeInstance;
-    private AndroidJavaObject androidInAppMessageStatsListenerBridgeInstance;
-    private AndroidJavaObject androidInAppPurchaseStatsListenerBridgeInstance;
+	private AndroidJavaObject androidInAppMessageShowCountListenerBridgeInstance;
+	private AndroidJavaObject androidInAppPurchaseCountListenerBridgeInstance;
+    private AndroidJavaObject androidUserBehaviorQueryListenerBridgeInstance;
     private AndroidJavaObject inAppBillingServiceConnection;
 #endif
 
@@ -81,13 +82,17 @@ public class Seeds : MonoBehaviour
 		{
 		androidBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
 		}
-		using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppMessageStatsListenerBridge"))
+		using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppMessageShowCountListenerBridge"))
 		{
-		androidInAppMessageStatsListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+		androidInAppMessageShowCountListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
 		}
-		using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppPurchaseStatsListenerBridge"))
+		using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppPurchaseCountListenerBridge"))
 		{
-		androidInAppPurchaseStatsListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+		androidInAppPurchaseCountListenerBridgeInstance = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
+		}
+    	using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.UserBehaviorQueryListenerBridge"))
+		{
+		androidUserBehaviorQueryListenerBridgeInstance  = javaClass.CallStatic<AndroidJavaObject>("create", gameObject.name);
 		}
 		using (var javaClass = new AndroidJavaClass("com.playseeds.unity3d.androidbridge.InAppBillingServiceConnection"))
 		{
@@ -106,7 +111,7 @@ public class Seeds : MonoBehaviour
 		NotifyOnStart();
 		#endif
     }
-		
+
     void OnApplicationPause(bool pauseStatus)
     {
         if (TraceEnabled)
@@ -211,7 +216,7 @@ public class Seeds : MonoBehaviour
     {
         if (TraceEnabled)
             Debug.Log(string.Format ("[Seeds] OnInAppMessageDismissed({0})", messageId));
-        
+
         if (OnInAppMessageDismissed != null)
             OnInAppMessageDismissed(messageId);
     }
@@ -220,7 +225,7 @@ public class Seeds : MonoBehaviour
     {
         if (TraceEnabled)
             Debug.Log(string.Format("[Seeds] OnInAppMessageLoadSucceeded({0})", messageId));
-        
+
         if (OnInAppMessageLoadSucceeded != null)
             OnInAppMessageLoadSucceeded(messageId);
     }
@@ -229,7 +234,7 @@ public class Seeds : MonoBehaviour
     {
         if (TraceEnabled)
             Debug.Log(string.Format("[Seeds] OnInAppMessageShownSuccessfully({0})", messageId));
-        
+
         if (OnInAppMessageShownSuccessfully != null)
             OnInAppMessageShownSuccessfully(messageId);
     }
@@ -238,7 +243,7 @@ public class Seeds : MonoBehaviour
     {
         if (TraceEnabled)
             Debug.Log(string.Format("[Seeds] OnInAppMessageShownInsuccessfully({0})", messageId));
-        
+
         if (OnInAppMessageShownInsuccessfully != null)
             OnInAppMessageShownInsuccessfully(messageId);
     }
@@ -247,7 +252,7 @@ public class Seeds : MonoBehaviour
     {
         if (TraceEnabled)
             Debug.Log(string.Format("[Seeds] OnNoInAppMessageFound({0})", messageId));
-        
+
         if (OnNoInAppMessageFound != null)
             OnNoInAppMessageFound(messageId);
     }
@@ -802,7 +807,7 @@ public class Seeds : MonoBehaviour
     public void RequestInAppPurchaseCount (string key)
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("requestInAppPurchaseCount", key, androidInAppPurchaseStatsListenerBridgeInstance);
+        androidInstance.Call("requestInAppPurchaseCount", key, androidInAppPurchaseCountListenerBridgeInstance);
 #elif UNITY_IOS && !UNITY_EDITOR
         Seeds_RequestInAppPurchaseCount(key);
 #else
@@ -839,7 +844,7 @@ public class Seeds : MonoBehaviour
 	public void RequestGenericUserBehaviorQuery (string queryPath)
 	{
 #if UNITY_ANDROID && !UNITY_EDITOR
-		androidInstance.Call("requestGenericUserBehaviorQuery", queryPath, androidGenericUserBehaviorQueryBridgeInstance);
+		androidInstance.Call("requestGenericUserBehaviorQuery", queryPath, androidUserBehaviorQueryListenerBridgeInstance);
 #elif UNITY_IOS && !UNITY_EDITOR
 		Seeds_RequestGenericUserBehaviorQuery(queryPath);
 #else
@@ -852,4 +857,3 @@ public class Seeds : MonoBehaviour
 	private static extern void Seeds_RequestGenericUserBehaviorQuery(string queryPath);
 #endif
 }
-
