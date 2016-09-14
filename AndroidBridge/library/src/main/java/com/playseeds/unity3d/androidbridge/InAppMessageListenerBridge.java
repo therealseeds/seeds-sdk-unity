@@ -40,7 +40,7 @@ public class InAppMessageListenerBridge implements InAppMessageListener {
     }
 
     public void inAppMessageClickedWithDynamicPrice(String messageId, Double price) {
-        String msg = String.format(Locale.US, "%@ %1.2f", messageId, price);
+        String msg = messageId + " " + String.format("%1.2f", price);
         UnityPlayer.UnitySendMessage(unityObjectName, "inAppMessageClickedWithDynamicPrice", msg);
     }
 
