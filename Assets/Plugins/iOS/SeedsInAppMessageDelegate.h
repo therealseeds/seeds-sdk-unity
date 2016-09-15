@@ -29,7 +29,7 @@
 - (void)seedsInAppMessageClicked:(NSString*)messageId;
 - (void)seedsInAppMessageDismissed:(NSString*)messageId;
 
-// Callback signatures for an app with multiple interstitials with dynamic pricing
+// Use only if your interstitial enables the user to choose from multiple price tags
 - (void)seedsInAppMessageClicked:(NSString *)messageId withDynamicPrice:(double)price;
 
 @end
