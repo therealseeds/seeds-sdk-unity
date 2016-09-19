@@ -9,11 +9,7 @@ public class IntegrationDemoUI : MonoBehaviour
         var instanceIdGameObject = GameObject.Find("Instance ID");
         instanceIdGameObject.GetComponent<Text>().text = string.Format("Instance ID {0}", Random.Range(0, 1000));
 
-        var lastUrlReceivedGameObject = GameObject.Find("Last URL received");
-        SeedsDeepLinks.Instance.OnLinkArrived += (string url) => {
-            Debug.Log("Demo received URL + " + url);
-            lastUrlReceivedGameObject.GetComponent<Text>().text = url;
-        };
+        
 
         var statsGameObject = GameObject.Find ("Stats");
 		Seeds.Instance.OnInAppMessageShowCount += (string error, int count, string messageId) => {
@@ -22,6 +18,15 @@ public class IntegrationDemoUI : MonoBehaviour
 		Seeds.Instance.OnInAppPurchaseCount += (string error, int count, string key) => {
 			statsGameObject.GetComponent<Text> ().text = string.Format ("OnInAppPurchaseCount({0}, {1}, {2})", error, count, key);
         };
+
+		var lastUrlReceivedGameObject = GameObject.Find("Last URL received");
+		Seeds.Instance.OnInAppMessageClicked += (string messageId) => {
+			lastUrlReceivedGameObject.GetComponent<Text>().text = "Clicked: " + messageId;
+		};
+
+		Seeds.Instance.OnInAppMessageDismissed += (string messageId) => {
+			lastUrlReceivedGameObject.GetComponent<Text>().text = "Dismissed: " + messageId;
+		};
 
 		Seeds.Instance.RequestInAppMessage("575f872a64bc1e5b0eca506f");
 		Seeds.Instance.RequestInAppMessage("5746851bb29ee753053a7c9a");
