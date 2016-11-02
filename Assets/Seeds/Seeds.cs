@@ -690,65 +690,30 @@ public class Seeds : MonoBehaviour
         return this;
     }
 
-//    #if UNITY_IOS && !UNITY_EDITOR
-//    [DllImport ("__Internal")]
-//    private static extern bool Seeds_GetABTestingOn();
-//    #endif
-//
-//    public bool IsABTestingOn
-//    {
-//        get
-//        {
-//            #if UNITY_ANDROID && !UNITY_EDITOR
-//            return androidInstance.Call<bool>("isA_bTestingOn");
-//            #elif UNITY_IOS && !UNITY_EDITOR
-//            return Seeds_GetABTestingOn();
-//            #else
-//            NotImplemented("IsABTestingOn::get");
-//            return false;
-//            #endif
-//        }
-//        set
-//        {
-//            SetABTestingOn(value);
-//        }
-//    }
-//
-//    #if UNITY_IOS && !UNITY_EDITOR
-//    [DllImport ("__Internal")]
-//    private static extern void Seeds_SetABTestingOn(bool abTestingOn);
-//    #endif
-//
-//    public void SetABTestingOn(bool abTestingOn)
-//    {
-//        #if UNITY_ANDROID && !UNITY_EDITOR
-//        androidInstance.Call("setA_bTestingOn", abTestingOn);
-//        #elif UNITY_IOS && !UNITY_EDITOR
-//        Seeds_SetABTestingOn(abTestingOn);
-//        #else
-//        NotImplemented("SetABTestingOn(bool abTestingOn)");
-//        #endif
-//    }
-
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
-    private static extern void Seeds_RequestInAppMessage(string messageId);
+    private static extern void Seeds_RequestInAppMessage(string messageId, string manualLocalizedPrice);
 #endif
+
+    public void RequestInAppMessage(string messageId, string manualLocalizedPrice)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        androidInstance.Call("requestInAppMessage", messageId, manualLocalizedPrice);
+#elif UNITY_IOS && !UNITY_EDITOR
+        Seeds_RequestInAppMessage(messageId, manualLocalizedPrice);
+#else
+        NotImplemented("RequestInAppMessage(string messageId, string manualLocalizedPrice)");
+#endif
+    }
 
     public void RequestInAppMessage(string messageId)
     {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("requestInAppMessage", messageId);
-#elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_RequestInAppMessage(messageId);
-#else
-        NotImplemented("RequestInAppMessage(string messageId)");
-#endif
+        RequestInAppMessage(messageId, null);
     }
 
     public void RequestInAppMessage()
     {
-        RequestInAppMessage(null);
+        RequestInAppMessage(null, null);
     }
 
 #if UNITY_IOS && !UNITY_EDITOR

@@ -211,11 +211,13 @@ void Seeds_EnableCrashReporting()
 //    Seeds.sharedInstance.inAppMessageABTestingEnabled = abTestingOn;
 //}
 
-void Seeds_RequestInAppMessage(const char* pcsMessageId)
+void Seeds_RequestInAppMessage(const char* pcsMessageId, const char* pcsManualLocalizedPrice)
 {
     NSString* messageId = pcsMessageId ? [NSString stringWithUTF8String:pcsMessageId] : nil;
-    [Seeds.sharedInstance requestInAppMessage:messageId];
+    NSString* manualLocalizedPrice = pcsManualLocalizedPrice ? [NSString stringWithUTF8String:pcsManualLocalizedPrice] : nil;
+    [Seeds.sharedInstance requestInAppMessage:messageId withManualLocalizedPrice: manualLocalizedPrice];
 }
+
 
 BOOL Seeds_IsInAppMessageLoaded(const char* pcsMessageId)
 {

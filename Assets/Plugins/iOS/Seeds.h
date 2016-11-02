@@ -72,6 +72,7 @@ extern NSString* const kCLYUserCustom;
 - (void)recordSeedsIAPEvent:(NSString *)key price:(double)price;
 
 - (void)requestInAppMessage:(NSString*)messageId;
+- (void)requestInAppMessage:(NSString *)messageId withManualLocalizedPrice:(NSString*)price;
 
 - (BOOL)isInAppMessageLoaded:(NSString*)messageId;
 

@@ -356,11 +356,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11451482, guid: 7e4d073fe95614324b19babe4b4eabea, type: 2}
       propertyPath: ApplicationKey
-      value: 71ac2900e9d31647d68d0ddc6f0aaf52611a612d
+      value: 2db64b49085be463cade71ce22e6341d7f6bd901
       objectReference: {fileID: 0}
     - target: {fileID: 11451482, guid: 7e4d073fe95614324b19babe4b4eabea, type: 2}
       propertyPath: ServerURL
-      value: http://staging.playseeds.com
+      value: https://dash.playseeds.com
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7e4d073fe95614324b19babe4b4eabea, type: 2}

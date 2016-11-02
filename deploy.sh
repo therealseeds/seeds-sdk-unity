@@ -90,8 +90,8 @@ if [[ $operation = "bintray" ]]; then
   FILE=$SDK_FILE; PCK_NAME='unity5-sdk'
   deploy_bintray
 
-  # FILE=$SDK_LEGACY_FILE; PCK_NAME='unity4-sdk'
-  # deploy_bintray
+  FILE=$SDK_LEGACY_FILE; PCK_NAME='unity4-sdk'
+  deploy_bintray
 
   echo "Remember to update links and versions in the Unity SDK documentation page!"
 fi
