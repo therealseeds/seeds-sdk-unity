@@ -179,16 +179,22 @@ void Seeds_RecordEvent3(const char* pcsKey, int count, double sum)
     [Seeds.sharedInstance recordEvent:key count:count sum:sum];
 }
 
-void Seeds_RecordIAPEvent(const char* pcsKey, double price)
+void Seeds_RecordIAPEvent(const char* pcsKey, double price, const char* pcsTransactionId)
 {
     NSString* key = [NSString stringWithUTF8String:pcsKey];
-    [Seeds.sharedInstance recordIAPEvent:key price:price];
+    NSString* transactionId = pcsTransactionId
+      ? [NSString stringWithUTF8String:pcsTransactionId]
+      : nil;
+    [Seeds.sharedInstance recordIAPEvent:key price:price transactionId:transactionId];
 }
 
-void Seeds_RecordSeedsIAPEvent(const char* pcsKey, double price)
+void Seeds_RecordSeedsIAPEvent(const char* pcsKey, double price, const char* pcsTransactionId)
 {
     NSString* key = [NSString stringWithUTF8String:pcsKey];
-    [Seeds.sharedInstance recordSeedsIAPEvent:key price:price];
+    NSString* transactionId = pcsTransactionId
+      ? [NSString stringWithUTF8String:pcsTransactionId]
+      : nil;
+    [Seeds.sharedInstance recordSeedsIAPEvent:key price:price transactionId:transactionId];
 }
 
 void Seeds_SetLocation(double lat, double lon)

@@ -68,8 +68,10 @@ extern NSString* const kCLYUserBirthYear;
 extern NSString* const kCLYUserCustom;
 
 - (void)recordIAPEvent:(NSString *)key price:(double)price;
+- (void)recordIAPEvent:(NSString *)key price:(double)price transactionId:(NSString *)transactionId;
 
 - (void)recordSeedsIAPEvent:(NSString *)key price:(double)price;
+- (void)recordSeedsIAPEvent:(NSString *)key price:(double)price transactionId:(NSString *)transactionId;
 
 - (void)requestInAppMessage:(NSString*)messageId;
 - (void)requestInAppMessage:(NSString *)messageId withManualLocalizedPrice:(NSString*)price;
