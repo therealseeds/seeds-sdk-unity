@@ -507,33 +507,43 @@ public class Seeds : MonoBehaviour
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
-    private static extern void Seeds_RecordIAPEvent(string key, double price);
+    private static extern void Seeds_RecordIAPEvent(string key, double price, string transactionId);
 #endif
 
     public void RecordIAPEvent(string key, double price)
     {
+        RecordIAPEvent(key, price, null);
+    }
+
+    public void RecordIAPEvent(string key, double price, string transactionId)
+    {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("recordIAPEvent", key, price);
+        androidInstance.Call("recordIAPEvent", key, price, transactionId);
 #elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_RecordIAPEvent(key, price);
+        Seeds_RecordIAPEvent(key, price, transactionId);
 #else
-        NotImplemented("RecordIAPEvent(string key, double price)");
+        NotImplemented("RecordIAPEvent(string key, double price, string transactionId)");
 #endif
     }
 
 #if UNITY_IOS && !UNITY_EDITOR
     [DllImport ("__Internal")]
-    private static extern void Seeds_RecordSeedsIAPEvent(string key, double price);
+    private static extern void Seeds_RecordSeedsIAPEvent(string key, double price, string transactionId);
 #endif
 
     public void RecordSeedsIAPEvent(string key, double price)
     {
+        RecordSeedsIAPEvent(key, price, null);
+    }
+
+    public void RecordSeedsIAPEvent(string key, double price, string transactionId)
+    {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        androidInstance.Call("recordSeedsIAPEvent", key, price);
+        androidInstance.Call("recordSeedsIAPEvent", key, price, transactionId);
 #elif UNITY_IOS && !UNITY_EDITOR
-        Seeds_RecordSeedsIAPEvent(key, price);
+        Seeds_RecordSeedsIAPEvent(key, price, transactionId);
 #else
-        NotImplemented("RecordSeedsIAPEvent(string key, double price)");
+        NotImplemented("RecordSeedsIAPEvent(string key, double price, string transactionId)");
 #endif
     }
 
